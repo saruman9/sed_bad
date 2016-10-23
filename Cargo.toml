@@ -1,0 +1,11 @@
+[package]
+name = "sed_bad"
+version = "0.1.0"
+authors = ["saruman9 <rum.274.4@gmail.com>"]
+
+[dependencies]
+chrono = "0.2"
+
+[dependencies.gtk]
+version = "0.1"
+features = ["v3_16"]
