@@ -9,6 +9,11 @@ use std::cell::RefCell;
 
 pub struct MainUI {
     // Menu.
+    menu_bar: gtk::MenuBar,
+    file_menu_item: gtk::MenuItem,
+    file_menu: gtk::Menu,
+    quit_menu_item: gtk::MenuItem,
+
     window: gtk::Window,
     v_box: gtk::Box,
 }
@@ -18,6 +23,11 @@ impl MainUI {
         gtk::init().unwrap_or_else(|_| panic!("Failed to initialize GTK."));
 
         let tmp = MainUI {
+            menu_bar: gtk::MenuBar::new(),
+            file_menu_item: gtk::MenuItem::new_with_mnemonic("_File"),
+            file_menu: gtk::Menu::new(),
+            quit_menu_item: gtk::MenuItem::new_with_mnemonic("_Quit"),
+
             window: gtk::Window::new(gtk::WindowType::Toplevel),
             v_box: gtk::Box::new(gtk::Orientation::Vertical, 0),
         };
@@ -32,7 +42,17 @@ impl MainUI {
     }
 
     fn setup(&self) {
+        self.setup_menu();
+        self.setup_v_box();
         self.setup_window();
+    }
+
+    fn setup_menu(&self) {
+
+    }
+
+    fn setup_v_box(&self) {
+
     }
 
     fn setup_window(&self) {
@@ -56,11 +76,39 @@ impl MainUI {
     }
 
     fn pack_and_show(&self) {
+        self.pack_menu();
+        self.pack_v_box();
         self.pack_window();
     }
 
+    fn pack_menu(&self) {
+        self.pack_file_menu();
+        self.pack_menu_bar();
+    }
+
+    fn pack_file_menu(&self) {
+        use gtk::{MenuItemExt, MenuShellExt};
+
+        self.file_menu_item.set_submenu(Some(&self.file_menu));
+        self.file_menu.append(&self.quit_menu_item);
+    }
+
+    fn pack_menu_bar(&self) {
+        use gtk::MenuShellExt;
+
+        self.menu_bar.append(&self.file_menu_item);
+    }
+
+    fn pack_v_box(&self) {
+        use gtk::BoxExt;
+
+        self.v_box.pack_start(&self.menu_bar, false, false, 0);
+    }
+
     fn pack_window(&self) {
-        use gtk::WidgetExt;
+        use gtk::{WidgetExt, ContainerExt};
+
+        self.window.add(&self.v_box);
 
         self.window.show_all();
     }
