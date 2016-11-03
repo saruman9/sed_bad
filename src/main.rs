@@ -9,6 +9,7 @@ mod category;
 mod comment;
 mod permission;
 mod ui;
+mod errors;
 
 use ui::MainUI;
 

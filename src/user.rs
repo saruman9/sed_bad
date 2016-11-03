@@ -4,6 +4,9 @@
 
 use md5;
 
+use errors::AuthResult;
+
+
 trait UserVec {
     fn is_auth(&self, name: &str, pass: &str) -> bool;
 }
