@@ -5,6 +5,7 @@ authors = ["saruman9 <rum.274.4@gmail.com>"]
 
 [dependencies]
 chrono = "0.2"
+md5 = "0.2"
 
 [dependencies.gtk]
 version = "0.1"

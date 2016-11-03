@@ -1,4 +1,5 @@
 extern crate chrono;
+extern crate md5;
 extern crate gtk;
 
 mod document;

@@ -4,6 +4,7 @@ version = "0.1.0"
 dependencies = [
  "chrono 0.2.25 (registry+https://github.com/rust-lang/crates.io-index)",
  "gtk 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "md5 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -229,6 +230,11 @@ version = "0.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "md5"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
 name = "num"
 version = "0.1.36"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -328,6 +334,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum gtk-sys 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)" = "91d0e8c624c3b4e8047b960b350b208c82e2eb0d4e3db5da9a55590c10f2616d"
 "checksum kernel32-sys 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)" = "7507624b29483431c0ba2d82aece8ca6cdba9382bff4ddd0f7490560c056098d"
 "checksum libc 0.2.17 (registry+https://github.com/rust-lang/crates.io-index)" = "044d1360593a78f5c8e5e710beccdc24ab71d1f01bc19a29bcacdba22e8475d8"
+"checksum md5 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "7df230903ccdffd6b3b4ec21624498ea64c912ce50297846907f0b8e1bb249dd"
 "checksum num 0.1.36 (registry+https://github.com/rust-lang/crates.io-index)" = "bde7c03b09e7c6a301ee81f6ddf66d7a28ec305699e3d3b056d2fc56470e3120"
 "checksum num-integer 0.1.32 (registry+https://github.com/rust-lang/crates.io-index)" = "fb24d9bfb3f222010df27995441ded1e954f8f69cd35021f6bef02ca9552fb92"
 "checksum num-iter 0.1.32 (registry+https://github.com/rust-lang/crates.io-index)" = "287a1c9969a847055e1122ec0ea7a5c5d6f72aad97934e131c83d5c08ab4e45c"
