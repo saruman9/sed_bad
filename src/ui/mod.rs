@@ -2,13 +2,18 @@
 //!
 //! TODO Write documentation.
 
+mod auth;
+
 use gtk;
+pub use super::user::User;
 
 use std::rc::Rc;
 use std::cell::RefCell;
 
 pub struct MainUI {
     // Menu.
+    current_user: Rc<RefCell<User>>,
+
     menu_bar: gtk::MenuBar,
     file_menu_item: gtk::MenuItem,
     file_menu: gtk::Menu,
@@ -23,6 +28,8 @@ impl MainUI {
         gtk::init().unwrap_or_else(|_| panic!("Failed to initialize GTK."));
 
         let tmp = MainUI {
+            current_user: Rc::new(RefCell::new(User::default())),
+
             menu_bar: gtk::MenuBar::new(),
             file_menu_item: gtk::MenuItem::new_with_mnemonic("_File"),
             file_menu: gtk::Menu::new(),
@@ -39,6 +46,10 @@ impl MainUI {
 
     pub fn run(&self) {
         gtk::main();
+    }
+
+    pub fn set_user(&self, user: User) {
+        self.current_user.borrow_mut().set(user);
     }
 
     fn setup(&self) {

@@ -2,6 +2,8 @@
 //!
 //! TODO Write documentation.
 
+use std::path::{PathBuf, Path};
+
 use md5;
 
 use errors::AuthResult;
@@ -9,6 +11,7 @@ use errors::AuthResult;
 
 trait UserVec {
     fn is_auth(&self, name: &str, pass: &str) -> bool;
+    fn from_file<P: AsRef<Path>>(&mut self, file: P) -> AuthResult<()>;
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -30,8 +33,20 @@ impl User {
         }
     }
 
+    pub fn set(&mut self, user: User) {
+        self.name = user.name;
+        self.pass = user.pass;
+        self.pass_hash = user.pass_hash;
+    }
+
     pub fn name(&self) -> &str {
         self.name.as_ref()
+    }
+}
+
+impl Default for User {
+    fn default() -> Self {
+        User::new(&String::default(), &String::default())
     }
 }
 
@@ -42,6 +57,10 @@ impl UserVec for Vec<User> {
         } else {
             false
         }
+    }
+
+    fn from_file<P: AsRef<Path>>(&mut self, file: P) -> AuthResult<()> {
+        Ok(())
     }
 }
 
