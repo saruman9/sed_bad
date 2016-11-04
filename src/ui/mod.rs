@@ -10,6 +10,7 @@ pub use super::user::User;
 use std::rc::Rc;
 use std::cell::RefCell;
 
+#[derive(Clone)]
 pub struct MainUI {
     // Menu.
     current_user: Rc<RefCell<User>>,
@@ -17,6 +18,7 @@ pub struct MainUI {
     menu_bar: gtk::MenuBar,
     file_menu_item: gtk::MenuItem,
     file_menu: gtk::Menu,
+    print_user_menu_item: gtk::MenuItem,
     quit_menu_item: gtk::MenuItem,
 
     window: gtk::Window,
@@ -33,6 +35,7 @@ impl MainUI {
             menu_bar: gtk::MenuBar::new(),
             file_menu_item: gtk::MenuItem::new_with_mnemonic("_File"),
             file_menu: gtk::Menu::new(),
+            print_user_menu_item: gtk::MenuItem::new_with_mnemonic("_Print User"),
             quit_menu_item: gtk::MenuItem::new_with_mnemonic("_Quit"),
 
             window: gtk::Window::new(gtk::WindowType::Toplevel),
@@ -41,6 +44,7 @@ impl MainUI {
         tmp.setup();
         tmp.connect_signals();
         tmp.pack_and_show();
+        auth::AuthUI::init(tmp.clone()).run();
         Rc::new(RefCell::new(tmp))
     }
 
@@ -74,7 +78,26 @@ impl MainUI {
     }
 
     fn connect_signals(&self) {
+        self.connect_signals_quit_menu();
+        self.connect_signals_print_user_menu();
         self.connect_signals_window();
+    }
+
+    fn connect_signals_print_user_menu(&self) {
+        use gtk::MenuItemExt;
+
+        let rc = self.clone();
+        self.print_user_menu_item.connect_activate(move |_| {
+            println!("{:?}", rc.current_user);
+        });
+    }
+
+    fn connect_signals_quit_menu(&self) {
+        use gtk::MenuItemExt;
+
+        self.quit_menu_item.connect_activate(|_| {
+            gtk::main_quit();
+        });
     }
 
     fn connect_signals_window(&self) {
@@ -101,6 +124,7 @@ impl MainUI {
         use gtk::{MenuItemExt, MenuShellExt};
 
         self.file_menu_item.set_submenu(Some(&self.file_menu));
+        self.file_menu.append(&self.print_user_menu_item);
         self.file_menu.append(&self.quit_menu_item);
     }
 

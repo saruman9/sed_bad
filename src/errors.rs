@@ -1,5 +1,5 @@
-//! Implementing of some types of errors.
 #![warn(missing_docs)]
+//! Implementing of some types of errors.
 
 use std::io;
 use std::fmt;
