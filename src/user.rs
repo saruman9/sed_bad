@@ -2,16 +2,12 @@
 //!
 //! TODO Write documentation.
 
-use std::path::{PathBuf, Path};
-
 use md5;
 
 use errors::AuthResult;
 
-
 trait UserVec {
     fn is_auth(&self, name: &str, pass: &str) -> bool;
-    fn from_file<P: AsRef<Path>>(&mut self, file: P) -> AuthResult<()>;
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -57,10 +53,6 @@ impl UserVec for Vec<User> {
         } else {
             false
         }
-    }
-
-    fn from_file<P: AsRef<Path>>(&mut self, file: P) -> AuthResult<()> {
-        Ok(())
     }
 }
 

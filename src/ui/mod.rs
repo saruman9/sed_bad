@@ -5,11 +5,11 @@
 mod auth;
 
 use gtk;
-pub use super::user::User;
 
 use std::rc::Rc;
 use std::cell::RefCell;
 
+use user::User;
 #[derive(Clone)]
 pub struct MainUI {
     // Menu.
@@ -18,6 +18,7 @@ pub struct MainUI {
     menu_bar: gtk::MenuBar,
     file_menu_item: gtk::MenuItem,
     file_menu: gtk::Menu,
+    log_in_menu_item: gtk::MenuItem,
     print_user_menu_item: gtk::MenuItem,
     quit_menu_item: gtk::MenuItem,
 
@@ -26,8 +27,8 @@ pub struct MainUI {
 }
 
 impl MainUI {
-    pub fn init() -> Rc<RefCell<Self>> {
-        gtk::init().unwrap_or_else(|_| panic!("Failed to initialize GTK."));
+    pub fn init() -> Self {
+        gtk::init().expect("Failed to initialize GTK.");
 
         let tmp = MainUI {
             current_user: Rc::new(RefCell::new(User::default())),
@@ -35,6 +36,7 @@ impl MainUI {
             menu_bar: gtk::MenuBar::new(),
             file_menu_item: gtk::MenuItem::new_with_mnemonic("_File"),
             file_menu: gtk::Menu::new(),
+            log_in_menu_item: gtk::MenuItem::new_with_mnemonic("_Log in"),
             print_user_menu_item: gtk::MenuItem::new_with_mnemonic("_Print User"),
             quit_menu_item: gtk::MenuItem::new_with_mnemonic("_Quit"),
 
@@ -44,8 +46,8 @@ impl MainUI {
         tmp.setup();
         tmp.connect_signals();
         tmp.pack_and_show();
-        auth::AuthUI::init(tmp.clone()).run();
-        Rc::new(RefCell::new(tmp))
+
+        tmp
     }
 
     pub fn run(&self) {
@@ -79,8 +81,18 @@ impl MainUI {
 
     fn connect_signals(&self) {
         self.connect_signals_quit_menu();
+        self.connect_signals_log_in_menu();
         self.connect_signals_print_user_menu();
         self.connect_signals_window();
+    }
+
+    fn connect_signals_log_in_menu(&self) {
+        use gtk::MenuItemExt;
+
+        let rc = self.clone();
+        self.log_in_menu_item.connect_activate(move |_| {
+            auth::AuthUI::init(rc.clone());
+        });
     }
 
     fn connect_signals_print_user_menu(&self) {
@@ -125,6 +137,7 @@ impl MainUI {
 
         self.file_menu_item.set_submenu(Some(&self.file_menu));
         self.file_menu.append(&self.print_user_menu_item);
+        self.file_menu.append(&self.log_in_menu_item);
         self.file_menu.append(&self.quit_menu_item);
     }
 

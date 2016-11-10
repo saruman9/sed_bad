@@ -10,10 +10,11 @@ mod comment;
 mod permission;
 mod ui;
 mod errors;
+mod db;
 
 use ui::MainUI;
 
 fn main() {
     let ui = MainUI::init();
-    ui.borrow().run();
+    ui.run();
 }

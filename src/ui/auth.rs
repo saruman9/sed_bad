@@ -4,7 +4,7 @@
 use gtk;
 
 use super::MainUI;
-use super::User;
+use user::User;
 
 #[derive(Clone)]
 pub struct AuthUI {
@@ -41,7 +41,7 @@ impl AuthUI {
             pass_entry: gtk::Entry::new(),
 
             button_box: gtk::ButtonBox::new(gtk::Orientation::Horizontal),
-            login_button: gtk::Button::new_with_label("Login"),
+            login_button: gtk::Button::new_with_label("Log in"),
             exit_button: gtk::Button::new_with_label("Exit"),
         };
         tmp.setup();
@@ -53,7 +53,7 @@ impl AuthUI {
     fn setup(&self) {
         self.setup_info_bar();
         self.setup_labels();
-        self.setup_pass_entry();
+        self.setup_entries();
         self.setup_grid();
         self.setup_button_box();
         self.setup_dialog();
@@ -72,7 +72,7 @@ impl AuthUI {
         self.pass_label.set_halign(gtk::Align::Start);
     }
 
-    fn setup_pass_entry(&self) {
+    fn setup_entries(&self) {
         use gtk::EntryExt;
 
         self.pass_entry.set_visibility(false);
@@ -102,11 +102,11 @@ impl AuthUI {
         self.connect_signals_entries();
         self.connect_signals_dialog();
         self.connect_signals_exit_button();
-        self.connect_signals_login_button();
+        self.connect_signals_log_in_button();
     }
 
     fn connect_signals_entries(&self) {
-        use gtk::{EntryExt, ButtonExt, WidgetExt};
+        use gtk::{EntryExt, ButtonExt};
 
         {
             let rc: AuthUI = self.clone();
@@ -118,13 +118,6 @@ impl AuthUI {
             let rc: AuthUI = self.clone();
             self.pass_entry.connect_activate(move |_| {
                 rc.login_button.clicked();
-            });
-        }
-        {
-            // TODO Added hide info bar when changed text.
-            let rc: AuthUI = self.clone();
-            self.user_entry.connect_preedit_changed(move |_, _| {
-                rc.info_bar.hide();
             });
         }
     }
@@ -141,13 +134,13 @@ impl AuthUI {
     fn connect_signals_exit_button(&self) {
         use gtk::{ButtonExt, WidgetExt};
 
-        let rc = self.clone();
+        let rc: AuthUI = self.clone();
         self.exit_button.connect_clicked(move |_| {
             rc.dialog.destroy();
         });
     }
 
-    fn connect_signals_login_button(&self) {
+    fn connect_signals_log_in_button(&self) {
         use gtk::{ButtonExt, EntryExt, WidgetExt};
 
         let rc: AuthUI = self.clone();
@@ -164,7 +157,7 @@ impl AuthUI {
                         rc.info_bar.show();
                         return;
                     }
-                    rc.main_ui.set_user(User::new(&name, &pass));
+                    rc.main_ui.current_user.borrow_mut().set(User::new(&name, &pass));
                     rc.dialog.destroy();
                     return;
                 }
@@ -213,11 +206,5 @@ impl AuthUI {
         area.pack_start(&self.button_box, false, false, 0);
 
         self.dialog.show_all();
-    }
-
-    pub fn run(&self) {
-        use gtk::DialogExt;
-
-        self.dialog.run();
     }
 }
