@@ -1,6 +1,7 @@
 extern crate chrono;
 extern crate md5;
 extern crate gtk;
+extern crate rusqlite;
 
 mod document;
 mod metadata;

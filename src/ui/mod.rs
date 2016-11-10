@@ -10,10 +10,13 @@ use std::rc::Rc;
 use std::cell::RefCell;
 
 use user::User;
+use db::Db;
+
 #[derive(Clone)]
 pub struct MainUI {
     // Menu.
     current_user: Rc<RefCell<User>>,
+    db: Rc<RefCell<Db>>,
 
     menu_bar: gtk::MenuBar,
     file_menu_item: gtk::MenuItem,
@@ -32,6 +35,7 @@ impl MainUI {
 
         let tmp = MainUI {
             current_user: Rc::new(RefCell::new(User::default())),
+            db: Rc::new(RefCell::new(Db::new().expect("Error of creating database."))),
 
             menu_bar: gtk::MenuBar::new(),
             file_menu_item: gtk::MenuItem::new_with_mnemonic("_File"),
