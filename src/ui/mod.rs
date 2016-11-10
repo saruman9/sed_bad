@@ -160,4 +160,15 @@ impl MainUI {
 
         self.window.show_all();
     }
+
+    pub fn update_ui(&self) {
+        self.update_menu_bar();
+        self.update_main();
+    }
+
+    fn update_menu_bar(&self) {
+    }
+
+    fn update_main(&self) {
+    }
 }

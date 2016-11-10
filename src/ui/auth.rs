@@ -137,6 +137,7 @@ impl AuthUI {
         let rc: AuthUI = self.clone();
         self.exit_button.connect_clicked(move |_| {
             rc.dialog.destroy();
+            rc.main_ui.update_ui();
         });
     }
 
