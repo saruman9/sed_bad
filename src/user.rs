@@ -4,7 +4,8 @@
 
 use md5;
 
-use errors::AuthResult;
+use errors::{AuthResult, DbResult};
+use db::Db;
 
 trait UserVec {
     fn is_auth(&self, name: &str, pass: &str) -> bool;
@@ -56,6 +57,20 @@ impl UserVec for Vec<User> {
     }
 }
 
+impl Db {
+    pub fn init_root(self) -> DbResult<Db> {
+        self.conn()
+            .execute("
+INSERT OR REPLACE INTO users VALUES (
+    'root',
+    'toor',
+    '7b24afc8bc80e548d66c4e7ff72171c5'
+);",
+                     &[])?;
+        Ok(self)
+    }
+}
+
 #[test]
 fn new_user() {
     let new_user = User {
@@ -80,4 +95,19 @@ fn auth_user() {
     assert!(users.is_auth("right", "qwerty"));
     assert!(!users.is_auth("2", "qwerty"));
     assert!(!users.is_auth("wer", "qwef"));
+}
+
+#[test]
+fn check_init_root() {
+    let db = Db::new().and_then(|d| d.init_root()).unwrap();
+    db.conn().query_row("
+SELECT * FROM users WHERE name = ?;
+",
+                        &[&"root"],
+                        |row| {
+        assert_eq!(row.get::<i32, String>(0), "root");
+        assert_eq!(row.get::<i32, String>(1), "toor");
+        assert_eq!(row.get::<i32, String>(2),
+                   "7b24afc8bc80e548d66c4e7ff72171c5");
+    }).unwrap();
 }

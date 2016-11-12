@@ -35,7 +35,9 @@ impl MainUI {
 
         let tmp = MainUI {
             current_user: Rc::new(RefCell::new(User::default())),
-            db: Rc::new(RefCell::new(Db::new().expect("Error of creating database."))),
+            db: Rc::new(RefCell::new(Db::new()
+                .and_then(|d| d.init_root())
+                .expect("Error of creating database."))),
 
             menu_bar: gtk::MenuBar::new(),
             file_menu_item: gtk::MenuItem::new_with_mnemonic("_File"),
