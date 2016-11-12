@@ -3,6 +3,9 @@
 //! TODO Write documentation.
 
 mod auth;
+mod user_administration;
+mod edit_user;
+mod utils;
 
 use gtk;
 
@@ -28,8 +31,8 @@ pub struct MainUI {
 
     root_menu_item: gtk::MenuItem,
     root_menu: gtk::Menu,
-    change_users_menu_item: gtk::MenuItem,
-    change_categories_menu_item: gtk::MenuItem,
+    user_administration_menu_item: gtk::MenuItem,
+    category_administration_menu_item: gtk::MenuItem,
 
     window: gtk::Window,
     v_box: gtk::Box,
@@ -55,8 +58,9 @@ impl MainUI {
 
             root_menu_item: gtk::MenuItem::new_with_mnemonic("_Root configuration"),
             root_menu: gtk::Menu::new(),
-            change_users_menu_item: gtk::MenuItem::new_with_mnemonic("Change _users"),
-            change_categories_menu_item: gtk::MenuItem::new_with_mnemonic("Change _categories"),
+            user_administration_menu_item: gtk::MenuItem::new_with_mnemonic("_User administration"),
+            category_administration_menu_item: gtk::MenuItem::new_with_mnemonic("_Category \
+                                                                                 administration"),
 
             window: gtk::Window::new(gtk::WindowType::Toplevel),
             v_box: gtk::Box::new(gtk::Orientation::Vertical, 0),
@@ -70,10 +74,6 @@ impl MainUI {
 
     pub fn run(&self) {
         gtk::main();
-    }
-
-    pub fn set_user(&self, user: User) {
-        self.current_user.borrow_mut().set(user);
     }
 
     fn setup(&self) {
@@ -93,9 +93,7 @@ impl MainUI {
         self.root_menu_item.set_no_show_all(true);
     }
 
-    fn setup_v_box(&self) {
-
-    }
+    fn setup_v_box(&self) {}
 
     fn setup_window(&self) {
         use gtk::WindowExt;
@@ -108,6 +106,7 @@ impl MainUI {
         self.connect_signals_quit_menu();
         self.connect_signals_log_in_menu();
         self.connect_signals_print_user_menu();
+        self.connect_signals_user_administration_menu();
         self.connect_signals_window();
     }
 
@@ -134,6 +133,15 @@ impl MainUI {
 
         self.quit_menu_item.connect_activate(|_| {
             gtk::main_quit();
+        });
+    }
+
+    fn connect_signals_user_administration_menu(&self) {
+        use gtk::MenuItemExt;
+
+        let rc = self.clone();
+        self.user_administration_menu_item.connect_activate(move |_| {
+            user_administration::UserAdministration::new(rc.clone());
         });
     }
 
@@ -171,8 +179,8 @@ impl MainUI {
         use gtk::{MenuItemExt, MenuShellExt};
 
         self.root_menu_item.set_submenu(Some(&self.root_menu));
-        self.root_menu.append(&self.change_users_menu_item);
-        self.root_menu.append(&self.change_categories_menu_item);
+        self.root_menu.append(&self.user_administration_menu_item);
+        self.root_menu.append(&self.category_administration_menu_item);
     }
 
     fn pack_menu_bar(&self) {
@@ -212,6 +220,5 @@ impl MainUI {
         }
     }
 
-    fn update_main(&self) {
-    }
+    fn update_main(&self) {}
 }

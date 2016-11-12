@@ -13,10 +13,10 @@ trait UserVec {
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct User {
-    id: u32,
+    id: i64,
     name: String,
     pass: String,
-    pass_hash: [u8; 16],
+    pass_hash: String,
 }
 
 impl User {
@@ -26,7 +26,10 @@ impl User {
             id: 0,
             name: name.into(),
             pass: pass.clone().into(),
-            pass_hash: md5::compute(pass.into().as_bytes()),
+            pass_hash: md5::compute(pass.into().as_bytes())
+                .into_iter()
+                .map(|c| format!("{:x}", c))
+                .collect(),
         }
     }
 
@@ -36,7 +39,7 @@ impl User {
         self.pass_hash = user.pass_hash;
     }
 
-    pub fn id(&self) -> u32 {
+    pub fn id(&self) -> i64 {
         self.id
     }
 
@@ -48,15 +51,8 @@ impl User {
         self.pass.as_ref()
     }
 
-    pub fn pass_hash(&self) -> &[u8] {
+    pub fn pass_hash(&self) -> &str {
         self.pass_hash.as_ref()
-    }
-
-    pub fn pass_hash_as_string(&self) -> String {
-        self.pass_hash()
-            .iter()
-            .map(|c| format!("{:x}", c))
-            .collect()
     }
 
     pub fn is_root(&self) -> bool {
@@ -68,17 +64,55 @@ impl User {
             .prepare("
 SELECT * FROM users WHERE name = $1 AND pass = $2 AND pass_hash = $3;
 ")?;
-        stmt.exists(&[&self.name(), &self.pass(), &self.pass_hash_as_string()])
+        stmt.exists(&[&self.name(), &self.pass(), &self.pass_hash()])
             .map_err(|e| From::from(e))
     }
 
-    pub fn save_to_db(&mut self, db: &Db) -> DbResult<u32> {
+    pub fn save_to_db(&mut self, db: &Db) -> DbResult<i64> {
         let mut stmt = db.conn()
             .prepare("
 INSERT INTO users VALUES ($1, $2, $3);
 ")?;
-        self.id = stmt.insert(&[&self.name(), &self.pass(), &self.pass_hash_as_string()])? as u32;
+        self.id = stmt.insert(&[&self.name(), &self.pass(), &self.pass_hash()])?;
         Ok(self.id())
+    }
+
+    pub fn get_users(db: &Db) -> DbResult<Vec<User>> {
+        let mut users: Vec<User> = Vec::new();
+        let mut stmt = db.conn()
+            .prepare("
+SELECT ROWID, * FROM users;
+")?;
+        let mut rows = stmt.query(&[])?;
+        while let Some(row) = rows.next() {
+            let row = row?;
+            users.push(User {
+                id: row.get_checked(0)?,
+                name: row.get_checked(1)?,
+                pass: row.get_checked(2)?,
+                pass_hash: row.get_checked(3)?,
+            });
+        }
+        Ok(users)
+    }
+
+    pub fn delete_by_id(db: &Db, id: i64) -> DbResult<()> {
+        let mut stmt = db.conn()
+            .prepare("
+DELETE FROM users WHERE ROWID = ?;
+")?;
+        stmt.execute(&[&id])?;
+        Ok(())
+    }
+
+    pub fn update_by_id(db: &Db, id: i64, name: &str, pass: &str) -> DbResult<()> {
+        let updated_user = User::new(name, pass);
+        let mut stmt = db.conn()
+            .prepare("
+UPDATE users SET name = $1, pass = $2, pass_hash = $3 WHERE ROWID == $4;
+")?;
+        stmt.execute(&[&updated_user.name(), &updated_user.pass, &updated_user.pass_hash(), &id])?;
+        Ok(())
     }
 }
 
@@ -91,7 +125,10 @@ impl Default for User {
 impl UserVec for Vec<User> {
     fn is_auth(&self, name: &str, pass: &str) -> bool {
         if let Some(user) = self.iter().find(|user| user.name() == name) {
-            md5::compute(pass.as_bytes()) == user.pass_hash
+            md5::compute(pass.as_bytes())
+                .into_iter()
+                .map(|c| format!("{:x}", c))
+                .collect::<String>() == user.pass_hash
         } else {
             false
         }
@@ -114,8 +151,7 @@ fn new_user() {
         id: 0,
         name: "Test".to_string(),
         pass: "qwerty".to_string(),
-        pass_hash: [0xd8, 0x57, 0x8e, 0xdf, 0x84, 0x58, 0xce, 0x06, 0xfb, 0xc5, 0xbb, 0x76, 0xa5,
-                    0x8c, 0x5c, 0xa4],
+        pass_hash: "d8578edf8458ce6fbc5bb76a58c5ca4".to_string(),
     };
     assert_eq!(new_user, User::new("Test", "qwerty"));
 }
