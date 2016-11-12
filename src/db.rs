@@ -19,7 +19,7 @@ impl Db {
         let db_file: PathBuf;
         if let Ok(home_dir) = env::var("HOME") {
             let db_dir = PathBuf::from(&home_dir).join(".config/sed_bad");
-            try!(fs::create_dir_all(db_dir));
+            fs::create_dir_all(db_dir)?;
             db_file = PathBuf::from(home_dir).join(".config/sed_bad/db.sqlite3");
         } else {
             db_file = env::current_dir().unwrap().join("sed_bad.sqlite3");
@@ -30,7 +30,7 @@ impl Db {
     }
 
     fn init(conn: rusqlite::Connection) -> DbResult<Self> {
-        try!(conn.execute_batch("BEGIN;
+        conn.execute_batch("BEGIN;
                             CREATE TABLE IF NOT EXISTS users (
                               name TEXT NOT NULL UNIQUE,
                               pass TEXT NOT NULL,
@@ -44,7 +44,7 @@ impl Db {
                               comments TEXT,
                               responsible INTEGER,
                               changelog BLOB);
-                            COMMIT;"));
+                            COMMIT;")?;
         Ok(Db { conn: conn })
     }
 
