@@ -32,11 +32,12 @@ impl Db {
     fn init(conn: rusqlite::Connection) -> DbResult<Self> {
         conn.execute_batch("BEGIN;
                             CREATE TABLE IF NOT EXISTS users (
-                              name TEXT NOT NULL UNIQUE,
+                              name TEXT PRIMARY KEY NOT NULL,
                               pass TEXT NOT NULL,
                               pass_hash TEXT NOT NULL
                             );
                             CREATE TABLE IF NOT EXISTS docs (
+                              id INTEGER PRIMARY KEY ASC,
                               name TEXT NOT NULL,
                               metadata TEXT NOT NULL,
                               permission INTEGER NOT NULL,
