@@ -20,13 +20,13 @@ pub struct User {
 }
 
 impl User {
-    pub fn new(name: &str, pass: &str) -> Self {
+    pub fn new<S: Into<String> + Clone>(name: S, pass: S) -> Self {
         // TODO Change ID of users.
         User {
             id: 0,
-            name: name.to_string(),
-            pass: pass.to_string(),
-            pass_hash: md5::compute(pass.as_bytes()),
+            name: name.into(),
+            pass: pass.clone().into(),
+            pass_hash: md5::compute(pass.into().as_bytes()),
         }
     }
 
@@ -36,14 +36,51 @@ impl User {
         self.pass_hash = user.pass_hash;
     }
 
+    pub fn id(&self) -> u32 {
+        self.id
+    }
+
     pub fn name(&self) -> &str {
         self.name.as_ref()
+    }
+
+    pub fn pass(&self) -> &str {
+        self.pass.as_ref()
+    }
+
+    pub fn pass_hash(&self) -> &[u8] {
+        self.pass_hash.as_ref()
+    }
+
+    pub fn pass_hash_as_string(&self) -> String {
+        self.pass_hash()
+            .iter()
+            .map(|c| format!("{:x}", c))
+            .collect()
+    }
+
+    pub fn exists(&self, db: &Db) -> DbResult<bool> {
+        let mut stmt = db.conn()
+            .prepare("
+SELECT * FROM users WHERE name = $1 AND pass = $2 AND pass_hash = $3;
+")?;
+        stmt.exists(&[&self.name(), &self.pass(), &self.pass_hash_as_string()])
+            .map_err(|e| From::from(e))
+    }
+
+    pub fn save_to_db(&mut self, db: &Db) -> DbResult<u32> {
+        let mut stmt = db.conn()
+            .prepare("
+INSERT INTO users VALUES ($1, $2, $3);
+")?;
+        self.id = stmt.insert(&[&self.name(), &self.pass(), &self.pass_hash_as_string()])? as u32;
+        Ok(self.id())
     }
 }
 
 impl Default for User {
     fn default() -> Self {
-        User::new(&String::default(), &String::default())
+        User::new("", "")
     }
 }
 
@@ -59,14 +96,10 @@ impl UserVec for Vec<User> {
 
 impl Db {
     pub fn init_root(self) -> DbResult<Db> {
-        self.conn()
-            .execute("
-INSERT OR REPLACE INTO users VALUES (
-    'root',
-    'toor',
-    '7b24afc8bc80e548d66c4e7ff72171c5'
-);",
-                     &[])?;
+        let mut root_user: User = User::new("root", "toor");
+        if !root_user.exists(&self)? {
+            root_user.save_to_db(&self)?;
+        }
         Ok(self)
     }
 }
@@ -100,14 +133,16 @@ fn auth_user() {
 #[test]
 fn check_init_root() {
     let db = Db::new().and_then(|d| d.init_root()).unwrap();
-    db.conn().query_row("
+    db.conn()
+        .query_row("
 SELECT * FROM users WHERE name = ?;
 ",
-                        &[&"root"],
-                        |row| {
-        assert_eq!(row.get::<i32, String>(0), "root");
-        assert_eq!(row.get::<i32, String>(1), "toor");
-        assert_eq!(row.get::<i32, String>(2),
-                   "7b24afc8bc80e548d66c4e7ff72171c5");
-    }).unwrap();
+                   &[&"root"],
+                   |row| {
+                       assert_eq!(row.get::<i32, String>(0), "root");
+                       assert_eq!(row.get::<i32, String>(1), "toor");
+                       assert_eq!(row.get::<i32, String>(2),
+                                  "7b24afc8bc80e548d66c4e7ff72171c5");
+                   })
+        .unwrap();
 }
