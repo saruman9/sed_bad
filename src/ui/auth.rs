@@ -158,9 +158,26 @@ impl AuthUI {
                         rc.info_bar.show();
                         return;
                     }
-                    rc.main_ui.current_user.borrow_mut().set(User::new(&name, &pass));
+                    let new_user = User::new(name, pass);
+                    match new_user.exists(&rc.main_ui.db.borrow()) {
+                        Ok(b) => {
+                            if b {
+                                rc.main_ui.current_user.borrow_mut().set(new_user);
+                            } else {
+                                rc.info_label.set_label("Error of authorization.");
+                                rc.info_bar.show();
+                                return;
+                            }
+                        }
+                        Err(e) => {
+                            rc.info_label.set_label(format!("Error of database.\n{}", e).as_ref());
+                            rc.info_bar.show();
+                            return;
+                        }
+
+                    }
+                    rc.main_ui.update_ui();
                     rc.dialog.destroy();
-                    return;
                 }
             }
         });

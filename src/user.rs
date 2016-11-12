@@ -59,6 +59,10 @@ impl User {
             .collect()
     }
 
+    pub fn is_root(&self) -> bool {
+        self.name() == "root"
+    }
+
     pub fn exists(&self, db: &Db) -> DbResult<bool> {
         let mut stmt = db.conn()
             .prepare("

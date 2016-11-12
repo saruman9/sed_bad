@@ -19,11 +19,17 @@ pub struct MainUI {
     db: Rc<RefCell<Db>>,
 
     menu_bar: gtk::MenuBar,
+
     file_menu_item: gtk::MenuItem,
     file_menu: gtk::Menu,
     log_in_menu_item: gtk::MenuItem,
     print_user_menu_item: gtk::MenuItem,
     quit_menu_item: gtk::MenuItem,
+
+    root_menu_item: gtk::MenuItem,
+    root_menu: gtk::Menu,
+    change_users_menu_item: gtk::MenuItem,
+    change_categories_menu_item: gtk::MenuItem,
 
     window: gtk::Window,
     v_box: gtk::Box,
@@ -40,11 +46,17 @@ impl MainUI {
                 .expect("Error of creating database."))),
 
             menu_bar: gtk::MenuBar::new(),
+
             file_menu_item: gtk::MenuItem::new_with_mnemonic("_File"),
             file_menu: gtk::Menu::new(),
             log_in_menu_item: gtk::MenuItem::new_with_mnemonic("_Log in"),
             print_user_menu_item: gtk::MenuItem::new_with_mnemonic("_Print User"),
             quit_menu_item: gtk::MenuItem::new_with_mnemonic("_Quit"),
+
+            root_menu_item: gtk::MenuItem::new_with_mnemonic("_Root configuration"),
+            root_menu: gtk::Menu::new(),
+            change_users_menu_item: gtk::MenuItem::new_with_mnemonic("Change _users"),
+            change_categories_menu_item: gtk::MenuItem::new_with_mnemonic("Change _categories"),
 
             window: gtk::Window::new(gtk::WindowType::Toplevel),
             v_box: gtk::Box::new(gtk::Orientation::Vertical, 0),
@@ -71,7 +83,14 @@ impl MainUI {
     }
 
     fn setup_menu(&self) {
+        self.setup_root_menu();
+    }
 
+    fn setup_root_menu(&self) {
+        use gtk::WidgetExt;
+
+        self.root_menu_item.hide();
+        self.root_menu_item.set_no_show_all(true);
     }
 
     fn setup_v_box(&self) {
@@ -135,6 +154,7 @@ impl MainUI {
 
     fn pack_menu(&self) {
         self.pack_file_menu();
+        self.pack_root_menu();
         self.pack_menu_bar();
     }
 
@@ -147,10 +167,19 @@ impl MainUI {
         self.file_menu.append(&self.quit_menu_item);
     }
 
+    fn pack_root_menu(&self) {
+        use gtk::{MenuItemExt, MenuShellExt};
+
+        self.root_menu_item.set_submenu(Some(&self.root_menu));
+        self.root_menu.append(&self.change_users_menu_item);
+        self.root_menu.append(&self.change_categories_menu_item);
+    }
+
     fn pack_menu_bar(&self) {
         use gtk::MenuShellExt;
 
         self.menu_bar.append(&self.file_menu_item);
+        self.menu_bar.append(&self.root_menu_item);
     }
 
     fn pack_v_box(&self) {
@@ -173,6 +202,14 @@ impl MainUI {
     }
 
     fn update_menu_bar(&self) {
+        use gtk::WidgetExt;
+
+        if self.current_user.borrow().is_root() {
+            self.root_menu.show_all();
+            self.root_menu_item.show();
+        } else {
+            self.root_menu_item.hide();
+        }
     }
 
     fn update_main(&self) {
