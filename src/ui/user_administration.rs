@@ -52,10 +52,10 @@ impl UserAdministration {
             scrolled_window: gtk::ScrolledWindow::new(None, None),
 
             list_users_tree_view: gtk::TreeView::new(),
-            list_users_store: gtk::ListStore::new(&[gtk::Type::String, // Name.
-                                                    gtk::Type::String,
-                                                    gtk::Type::String,
-                                                    gtk::Type::String]), // Pass.
+            list_users_store: gtk::ListStore::new(&[gtk::Type::String, // Id.
+                                                    gtk::Type::String, // Name.
+                                                    gtk::Type::String, // Pass.
+                                                    gtk::Type::String]), // Pass Hash.
             id_column: gtk::TreeViewColumn::new(),
             name_column: gtk::TreeViewColumn::new(),
             pass_column: gtk::TreeViewColumn::new(),
@@ -77,7 +77,6 @@ impl UserAdministration {
 
     fn setup(&self) {
         self.setup_new_user_entry();
-        self.setup_list_users_tree_view();
         self.setup_columns();
         self.setup_list_users_store();
         self.setup_button_box();
@@ -88,10 +87,6 @@ impl UserAdministration {
         use gtk::EntryExt;
 
         self.new_user_entry.set_placeholder_text(Some("New user..."));
-    }
-
-    fn setup_list_users_tree_view(&self) {
-        self.list_users_tree_view.set_activate_on_single_click(true);
     }
 
     fn setup_columns(&self) {
@@ -248,7 +243,12 @@ impl UserAdministration {
                                               &format!("Error of deleting user.\n{}", e));
                         }
                     }
+                } else {
+                    show_error_dialog(&rc.dialog, "Root unchanged!");
+                    return;
                 }
+            } else {
+                show_error_dialog(&rc.dialog, "No one row is selecting.");
             }
         });
     }
@@ -258,7 +258,14 @@ impl UserAdministration {
 
         let rc: UserAdministration = self.clone();
         self.edit_button.connect_clicked(move |_| {
-            EditUser::new(rc.clone());
+            if rc.list_users_tree_view
+                .get_selection()
+                .get_selected()
+                .is_some() {
+                EditUser::new(rc.clone());
+            } else {
+                show_error_dialog(&rc.dialog, "No one row is selecting.");
+            }
         });
     }
 
@@ -267,9 +274,7 @@ impl UserAdministration {
 
         let rc = self.clone();
         self.list_users_tree_view.connect_row_activated(move |_, _, _| {
-            use gtk::WidgetExt;
-
-            rc.button_box.set_sensitive(true);
+            EditUser::new(rc.clone());
         });
     }
 
@@ -315,12 +320,10 @@ impl UserAdministration {
     }
 
     pub fn update_ui(&self) {
-        use gtk::{EntryExt, WidgetExt};
+        use gtk::EntryExt;
 
         self.new_user_entry.set_text("");
         self.list_users_store.clear();
         self.setup_list_users_store();
-        self.button_box.set_sensitive(false);
-        // self.list_users_tree_view.set_model(Some(&self.list_users_store));
     }
 }
