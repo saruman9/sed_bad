@@ -68,6 +68,7 @@ impl MainUI {
         tmp.setup();
         tmp.connect_signals();
         tmp.pack_and_show();
+        tmp.update_ui();
 
         tmp
     }
@@ -77,23 +78,8 @@ impl MainUI {
     }
 
     fn setup(&self) {
-        self.setup_menu();
-        self.setup_v_box();
         self.setup_window();
     }
-
-    fn setup_menu(&self) {
-        self.setup_root_menu();
-    }
-
-    fn setup_root_menu(&self) {
-        use gtk::WidgetExt;
-
-        self.root_menu_item.hide();
-        self.root_menu_item.set_no_show_all(true);
-    }
-
-    fn setup_v_box(&self) {}
 
     fn setup_window(&self) {
         use gtk::WindowExt;
@@ -213,7 +199,6 @@ impl MainUI {
         use gtk::WidgetExt;
 
         if self.current_user.borrow().is_root() {
-            self.root_menu.show_all();
             self.root_menu_item.show();
         } else {
             self.root_menu_item.hide();
