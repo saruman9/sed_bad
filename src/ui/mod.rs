@@ -6,6 +6,7 @@ mod auth;
 mod user_administration;
 mod edit_user;
 mod utils;
+mod new_ticket;
 
 use gtk;
 
@@ -253,7 +254,8 @@ impl MainUI {
     fn setup_directories_list(&self) {
         self.directories_list.insert(&gtk::Label::new(Some("Inbox")), 0);
         self.directories_list.insert(&gtk::Label::new(Some("Outbox")), 1);
-        self.directories_list.insert(&gtk::Label::new(Some("Favorites")), 2);
+        self.directories_list.insert(&gtk::Label::new(Some("All")), 2);
+        self.directories_list.insert(&gtk::Label::new(Some("Favorites")), 3);
     }
 
     fn setup_window(&self) {
@@ -268,6 +270,7 @@ impl MainUI {
         self.connect_signals_log_in_menu();
         self.connect_signals_print_user_menu();
         self.connect_signals_user_administration_menu();
+        self.connect_signals_create_ticket_t_button();
         self.connect_signals_window();
     }
 
@@ -303,6 +306,15 @@ impl MainUI {
         let rc = self.clone();
         self.user_administration_menu_item.connect_activate(move |_| {
             user_administration::UserAdministration::new(rc.clone());
+        });
+    }
+
+    fn connect_signals_create_ticket_t_button(&self) {
+        use gtk::ToolButtonExt;
+
+        let rc = self.clone();
+        self.create_ticket_t_button.connect_clicked(move |_| {
+            new_ticket::NewTicket::new(rc.clone());
         });
     }
 
@@ -414,8 +426,10 @@ impl MainUI {
 
         if self.current_user.borrow().is_root() {
             self.root_menu_item.show();
+            self.print_user_menu_item.show();
         } else {
             self.root_menu_item.hide();
+            self.print_user_menu_item.hide();
         }
     }
 
