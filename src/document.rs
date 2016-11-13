@@ -9,6 +9,7 @@ use user::User;
 use category::Category;
 
 struct Document {
+    id: i64,
     name: String,
     metadata: Metadata,
     access: Permission,
@@ -24,6 +25,7 @@ struct Change {}
 impl Document {
     pub fn new(name: &str, author: User, category: Category, data: &str) -> Self {
         Document {
+            id: 0,
             name: name.to_string(),
             metadata: Metadata::new(author, category),
             access: Permission::new(),

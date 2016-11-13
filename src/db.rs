@@ -44,7 +44,12 @@ impl Db {
                               data BLOB,
                               comments TEXT,
                               responsible INTEGER,
-                              changelog BLOB);
+                              changelog BLOB
+                            );
+                            CREATE TABLE IF NOT EXISTS categories (
+                              id INTEGET PRIMARY KEY ASC,
+                              name TEXT NOT NULL
+                            );
                             COMMIT;")?;
         Ok(Db { conn: conn })
     }
