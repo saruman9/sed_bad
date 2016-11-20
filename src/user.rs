@@ -89,6 +89,17 @@ INSERT INTO users VALUES (NULL, $1, $2, $3);
         })
     }
 
+    pub fn get_by_id(db: &Db, id: i64) -> DbResult<User> {
+        db.conn().query_row_and_then("SELECT * FROM users WHERE id = ?;", &[&id], |row| {
+            Ok(User {
+                id: row.get_checked(0)?,
+                name: row.get_checked(1)?,
+                pass: row.get_checked(2)?,
+                pass_hash: row.get_checked(3)?,
+            })
+        })
+    }
+
     pub fn get_users(db: &Db) -> DbResult<Vec<User>> {
         let mut users: Vec<User> = Vec::new();
         let mut stmt = db.conn()

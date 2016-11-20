@@ -9,7 +9,7 @@ pub struct Permission {
     others: NaivePermission,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 struct NaivePermission {
     read: bool,
     write: bool,
@@ -30,6 +30,17 @@ impl Permission {
         let responsible_perm = self.responsible.get_int() * 10;
         let others_perm = self.others.get_int();
         author_perm + responsible_perm + others_perm
+    }
+
+    pub fn from_int(perm: i64) -> Permission {
+        let author_perm = perm / 100;
+        let responsible_perm = (perm - author_perm * 100) / 10;
+        let others_perm = perm - author_perm * 100 - responsible_perm * 10;
+        Permission {
+            author: NaivePermission::from_int(author_perm),
+            responsible: NaivePermission::from_int(responsible_perm),
+            others: NaivePermission::from_int(others_perm),
+        }
     }
 }
 
@@ -55,4 +66,75 @@ impl NaivePermission {
         }
         res
     }
+
+    pub fn from_int(perm: i64) -> NaivePermission {
+        let read = perm & 4 == 4;
+        let write = perm & 2 == 2;
+        let comment = perm & 1 == 1;
+        NaivePermission {
+            read: read,
+            write: write,
+            comment: comment,
+        }
+    }
+}
+
+#[test]
+fn naive_permission_to_from_int() {
+    let new_perm = NaivePermission {
+        read: false,
+        write: false,
+        comment: false,
+    };
+    let new_perm_7 = NaivePermission {
+        read: true,
+        write: true,
+        comment: true,
+    };
+    let new_perm_6 = NaivePermission {
+        read: true,
+        write: true,
+        comment: false,
+    };
+    let new_perm_5 = NaivePermission {
+        read: true,
+        write: false,
+        comment: true,
+    };
+    let new_perm_4 = NaivePermission {
+        read: true,
+        write: false,
+        comment: false,
+    };
+    let new_perm_3 = NaivePermission {
+        read: false,
+        write: true,
+        comment: true,
+    };
+    let new_perm_2 = NaivePermission {
+        read: false,
+        write: true,
+        comment: false,
+    };
+    let new_perm_1 = NaivePermission {
+        read: false,
+        write: false,
+        comment: true,
+    };
+    assert_eq!(new_perm.get_int(), 0);
+    assert_eq!(new_perm_1.get_int(), 1);
+    assert_eq!(new_perm_2.get_int(), 2);
+    assert_eq!(new_perm_3.get_int(), 3);
+    assert_eq!(new_perm_4.get_int(), 4);
+    assert_eq!(new_perm_5.get_int(), 5);
+    assert_eq!(new_perm_6.get_int(), 6);
+    assert_eq!(new_perm_7.get_int(), 7);
+    assert_eq!(new_perm, NaivePermission::from_int(0));
+    assert_eq!(new_perm_1, NaivePermission::from_int(1));
+    assert_eq!(new_perm_2, NaivePermission::from_int(2));
+    assert_eq!(new_perm_3, NaivePermission::from_int(3));
+    assert_eq!(new_perm_4, NaivePermission::from_int(4));
+    assert_eq!(new_perm_5, NaivePermission::from_int(5));
+    assert_eq!(new_perm_6, NaivePermission::from_int(6));
+    assert_eq!(new_perm_7, NaivePermission::from_int(7));
 }

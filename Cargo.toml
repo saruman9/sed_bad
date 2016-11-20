@@ -6,7 +6,10 @@ authors = ["saruman9 <rum.274.4@gmail.com>"]
 [dependencies]
 chrono = "0.2"
 md5 = "0.2"
-rusqlite = "0.7"
+
+[dependencies.rusqlite]
+version = "0.7"
+features = ["chrono"]
 
 [dependencies.gtk]
 version = "0.1"

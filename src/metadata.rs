@@ -2,7 +2,7 @@
 //!
 //! TODO Write documentation.
 
-use chrono::{Date, DateTime, UTC, Datelike};
+use chrono::{Date, DateTime, UTC, Datelike, NaiveDateTime, TimeZone};
 
 use user::User;
 use category::Category;
@@ -17,11 +17,11 @@ pub struct Metadata {
     author: User, // TODO Reference?
     category: Category,
     status: Status,
-    date_expired: Date<UTC>,
+    date_expired: DateTime<UTC>,
 }
 
-#[derive(Debug)]
-enum Status {
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Status {
     Beginning,
     InProgress,
     Complete,
@@ -35,6 +35,15 @@ impl Status {
             Status::Complete => 2,
         }
     }
+
+    fn from_num(num: i64) -> Status {
+        match num {
+            0 => Status::Beginning,
+            1 => Status::InProgress,
+            2 => Status::Complete,
+            _ => Status::Beginning,
+        }
+    }
 }
 
 impl Metadata {
@@ -46,13 +55,7 @@ impl Metadata {
             author: author.clone(), // TODO Reference?
             category: category,
             status: Status::Beginning,
-            date_expired: UTC::today()
-                .with_year(date_expired.0 as i32)
-                .unwrap()
-                .with_month(date_expired.1)
-                .unwrap()
-                .with_day(date_expired.2)
-                .unwrap(),
+            date_expired: UTC.ymd(date_expired.0 as i32, date_expired.1, date_expired.2).and_hms(0, 0, 0),
         }
     }
 
@@ -60,12 +63,12 @@ impl Metadata {
         self.id
     }
 
-    pub fn c_time(&self) -> i64 {
-        self.c_time.num_seconds_from_unix_epoch()
+    pub fn c_time(&self) -> DateTime<UTC> {
+        self.c_time
     }
 
-    pub fn m_time(&self) -> i64 {
-        self.m_time.num_seconds_from_unix_epoch()
+    pub fn m_time(&self) -> DateTime<UTC> {
+        self.m_time
     }
 
     pub fn author(&self) -> &User {
@@ -76,8 +79,8 @@ impl Metadata {
         &self.category
     }
 
-    pub fn status(&self) -> &Status {
-        &self.status
+    pub fn status(&self) -> Status {
+        self.status.clone()
     }
 
     pub fn date_expired(&self) -> i64 {
@@ -95,7 +98,22 @@ INSERT INTO metadata VALUES (NULL, ?, ?, (SELECT id FROM users WHERE name  \
                       &self.author().name(),
                       &self.category().name(),
                       &self.status().get_num(),
-                      &self.date_expired()])?;
+                      &self.date_expired])?;
         Ok(self.id())
+    }
+
+    pub fn get_by_id(db: &Db, id: i64) -> DbResult<Metadata> {
+        db.conn().query_row_and_then("SELECT * FROM metadata WHERE id = ?;", &[&id], |row| {
+            Ok(Metadata {
+                id: row.get_checked(0)?,
+                c_time: row.get_checked(1)?,
+                m_time: row.get_checked(2)?,
+                author: User::get_by_id(db, row.get_checked(3)?)?,
+                category: Category::get_by_id(db, row.get_checked(4)?)?,
+                status: Status::from_num(row.get_checked(5)?),
+                date_expired: row.get_checked(6)?,
+            })
+        })
+
     }
 }

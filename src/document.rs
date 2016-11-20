@@ -97,4 +97,26 @@ INSERT INTO docs VALUES (NULL, ?, ?, ?, ?, ?);
         }
         Ok(self.id())
     }
+
+    pub fn get_docs(db: &Db) -> DbResult<Vec<Document>> {
+        let mut docs: Vec<Document> = Vec::new();
+        let mut stmt = db.conn()
+            .prepare("
+SELECT * FROM docs;
+")?;
+        let mut rows = stmt.query(&[])?;
+        while let Some(row) = rows.next() {
+            let row = row?;
+            docs.push(Document {
+                id: row.get_checked(0)?,
+                name: row.get_checked(1)?,
+                metadata: Metadata::get_by_id(db, row.get_checked(2)?)?,
+                permission: Permission::from_int(row.get_checked(3)?),
+                data: row.get_checked(4)?,
+                comments: Comment::get_by_doc_id(db, row.get_checked(0)?)?,
+                responsible: User::get_by_id(db, row.get_checked(5)?)?,
+            });
+        }
+        Ok(docs)
+    }
 }

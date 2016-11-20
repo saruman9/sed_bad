@@ -15,6 +15,8 @@ use std::cell::RefCell;
 
 use user::User;
 use db::Db;
+use document::Document;
+use metadata::Status;
 
 #[derive(Clone)]
 pub struct MainUI {
@@ -249,6 +251,37 @@ impl MainUI {
 
     fn setup_tickets_list_store(&self) {
         self.tickets_tree_view.set_model(Some(&self.tickets_list_store));
+        match Document::get_docs(&self.db.borrow()) {
+            Ok(docs) => {
+                for doc in docs {
+                    if self.current_user.borrow().name() == doc.responsible().name() ||
+                       self.current_user.borrow().name() == doc.metadata().author().name() {
+                        self.tickets_list_store.insert_with_values(None,
+                                                                   &[0, 1, 2, 3, 4, 5, 6],
+                                                                   &[&doc.id(),
+                                                                     &(doc.metadata().status() ==
+                                                                       Status::Complete),
+                                                                     &doc.name(),
+                                                                     &doc.metadata()
+                                                                         .author()
+                                                                         .name(),
+                                                                     &doc.metadata()
+                                                                         .c_time()
+                                                                         .to_rfc2822(),
+                                                                     &doc.metadata()
+                                                                         .m_time()
+                                                                         .to_rfc2822(),
+                                                                     &doc.responsible().name()]);
+                    }
+                }
+            }
+            Err(e) => {
+                utils::show_error_dialog(&self.window,
+                                         &format!("Error of reading from database (`docs` \
+                                                   table).\n{}",
+                                                  e));
+            }
+        }
     }
 
     fn setup_directories_list(&self) {
@@ -256,6 +289,7 @@ impl MainUI {
         self.directories_list.insert(&gtk::Label::new(Some("Outbox")), 1);
         self.directories_list.insert(&gtk::Label::new(Some("All")), 2);
         self.directories_list.insert(&gtk::Label::new(Some("Favorites")), 3);
+        self.directories_list.select_row(self.directories_list.get_row_at_index(2).as_ref());
     }
 
     fn setup_window(&self) {
@@ -455,6 +489,7 @@ impl MainUI {
     }
 
     fn update_tickets_tree_view(&self) {
-        
+        self.tickets_list_store.clear();
+        self.setup_tickets_list_store();
     }
 }

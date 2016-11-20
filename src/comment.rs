@@ -38,8 +38,8 @@ impl Comment {
         self.text.as_ref()
     }
 
-    pub fn c_time(&self) -> i64 {
-        self.c_time.num_seconds_from_unix_epoch()
+    pub fn c_time(&self) -> DateTime<UTC> {
+        self.c_time
     }
 
     pub fn save_to_db(&mut self, db: &Db, doc_id: i64) -> DbResult<i64> {
@@ -49,5 +49,23 @@ INSERT INTO comments VALUES (NULL, (SELECT id FROM users WHERE name = ?), ?, ?, 
 ")?;
         self.id = stmt.insert(&[&self.author().name(), &self.text(), &self.c_time(), &doc_id])?;
         Ok(self.id())
+    }
+
+    pub fn get_by_doc_id(db: &Db, doc_id: i64) -> DbResult<Vec<Comment>> {
+        let mut comments: Vec<Comment> = Vec::new();
+        let mut stmt = db.conn().prepare("
+SELECT * FROM comments WHERE doc_id = ?;
+")?;
+        let mut rows = stmt.query(&[&doc_id])?;
+        while let Some(row) = rows.next() {
+            let row = row?;
+            comments.push(Comment {
+                id: row.get_checked(0)?,
+                author: User::get_by_id(db, row.get_checked(1)?)?,
+                text: row.get_checked(2)?,
+                c_time: row.get_checked(3)?,
+            });
+        }
+        Ok(comments)
     }
 }

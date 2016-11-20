@@ -45,6 +45,15 @@ INSERT INTO categories VALUES (NULL, ?);
         })
     }
 
+    pub fn get_by_id(db: &Db, id: i64) -> DbResult<Category> {
+        db.conn().query_row_and_then("SELECT * FROM categories WHERE id = ?;", &[&id], |row| {
+            Ok(Category {
+                id: row.get_checked(0)?,
+                name: row.get_checked(1)?,
+            })
+        })
+    }
+
     pub fn get_categories(db: &Db) -> DbResult<Vec<Category>> {
         let mut categories: Vec<Category> = Vec::new();
         let mut stmt = db.conn()
