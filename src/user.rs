@@ -4,7 +4,7 @@
 
 use md5;
 
-use errors::{AuthResult, DbResult};
+use errors::DbResult;
 use db::Db;
 
 trait UserVec {
