@@ -30,27 +30,43 @@ impl Db {
     }
 
     fn init(conn: rusqlite::Connection) -> DbResult<Self> {
-        conn.execute_batch("BEGIN;
-                            CREATE TABLE IF NOT EXISTS users (
-                              name TEXT PRIMARY KEY NOT NULL,
-                              pass TEXT NOT NULL,
-                              pass_hash TEXT NOT NULL
-                            );
-                            CREATE TABLE IF NOT EXISTS docs (
-                              id INTEGER PRIMARY KEY ASC,
-                              name TEXT NOT NULL,
-                              metadata TEXT NOT NULL,
-                              permission INTEGER NOT NULL,
-                              data BLOB,
-                              comments TEXT,
-                              responsible INTEGER,
-                              changelog BLOB
-                            );
-                            CREATE TABLE IF NOT EXISTS categories (
-                              id INTEGET PRIMARY KEY ASC,
-                              name TEXT NOT NULL
-                            );
-                            COMMIT;")?;
+        conn.execute_batch("
+BEGIN;
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY ASC,
+    name TEXT NOT NULL UNIQUE,
+    pass TEXT NOT NULL,
+    pass_hash TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS categories (
+    id INTEGER PRIMARY KEY ASC,
+    name TEXT NOT NULL UNIQUE
+);
+CREATE TABLE IF NOT EXISTS metadata (
+    id INTEGER PRIMARY KEY ASC,
+    c_time INTEGER NOT NULL,
+    m_time INTEGER NOT NULL,
+    author_id NOT NULL REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    category_id NOT NULL REFERENCES categories(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    status INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS docs (
+    id INTEGER PRIMARY KEY ASC,
+    name TEXT NOT NULL,
+    metadata NOT NULL REFERENCES metadata(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    permission INTEGER NOT NULL,
+    data BLOB,
+    responsible INTEGER,
+    changelog BLOB
+);
+CREATE TABLE IF NOT EXISTS comments (
+    id INTEGER PRIMARY KEY ASC,
+    author_id NOT NULL REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    text TEXT NOT NULL,
+    c_time INTEGET NOT NULL,
+    doc_id NOT NULL REFERENCES docs(id) ON UPDATE CASCADE ON DELETE CASCADE
+);
+COMMIT;")?;
         Ok(Db { conn: conn })
     }
 

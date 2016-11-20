@@ -5,6 +5,7 @@
 use db::Db;
 use errors::DbResult;
 
+#[derive(Debug)]
 pub struct Category {
     id: i64,
     name: String,
@@ -29,10 +30,19 @@ impl Category {
     pub fn save_to_db(&mut self, db: &Db) -> DbResult<i64> {
         let mut stmt = db.conn()
             .prepare("
-INSERT INTO categories VALUES ?;
+INSERT INTO categories VALUES (NULL, ?);
 ")?;
         self.id = stmt.insert(&[&self.name()])?;
         Ok(self.id())
+    }
+
+    pub fn get_category(db: &Db, name: &str) -> DbResult<Category> {
+        db.conn().query_row_and_then("SELECT * FROM categories WHERE name = ?;", &[&name], |row| {
+            Ok(Category {
+                id: row.get_checked(0)?,
+                name: row.get_checked(1)?,
+            })
+        })
     }
 
     pub fn get_categories(db: &Db) -> DbResult<Vec<Category>> {

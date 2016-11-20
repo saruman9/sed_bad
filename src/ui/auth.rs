@@ -158,11 +158,15 @@ impl AuthUI {
                         rc.info_bar.show();
                         return;
                     }
-                    let new_user = User::new(name, pass);
+                    // TODO Rewrite logic!
+                    let new_user = User::new(name.clone(), pass);
                     match new_user.exists(&rc.main_ui.db.borrow()) {
                         Ok(b) => {
                             if b {
-                                rc.main_ui.current_user.borrow_mut().set(new_user);
+                                rc.main_ui
+                                    .current_user
+                                    .borrow_mut()
+                                    .set(User::get_user(&rc.main_ui.db.borrow(), &name).unwrap());
                             } else {
                                 rc.info_label.set_label("Error of authorization.");
                                 rc.info_bar.show();

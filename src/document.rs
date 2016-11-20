@@ -8,31 +8,37 @@ use comment::Comment;
 use user::User;
 use category::Category;
 
-struct Document {
+#[derive(Debug)]
+pub struct Document {
     id: i64,
     name: String,
     metadata: Metadata,
     access: Permission,
-    data: String,
+    data: Option<String>,
     comments: Vec<Comment>,
-    responsible: Option<User>, // TODO Reference?
-    changelog: Vec<Change>,
+    responsible: User, // TODO Reference?
 }
 
-// TODO.
-struct Change {}
-
 impl Document {
-    pub fn new(name: &str, author: User, category: Category, data: &str) -> Self {
+    pub fn new(name: String,
+               author: &User,
+               category: Category,
+               responsible_user: User,
+               expired_date: (u32, u32, u32),
+               comment: Option<Comment>)
+               -> Self {
         Document {
             id: 0,
             name: name.to_string(),
-            metadata: Metadata::new(author, category),
+            metadata: Metadata::new(&author, category, expired_date),
             access: Permission::new(),
-            data: data.to_string(),
-            comments: Vec::new(),
-            responsible: None,
-            changelog: Vec::new(),
+            data: None,
+            comments: if let Some(comment) = comment {
+                vec![comment]
+            } else {
+                vec![]
+            },
+            responsible: responsible_user,
         }
     }
 }

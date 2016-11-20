@@ -3,11 +3,15 @@
 //! TODO Write docs.
 
 use gtk;
+use rusqlite;
 
 use super::MainUI;
 use super::utils::show_error_dialog;
 use category::Category;
 use user::User;
+use comment::Comment;
+use document::Document;
+use errors::DbError;
 
 #[derive(Clone)]
 pub struct NewTicket {
@@ -143,7 +147,102 @@ impl NewTicket {
     }
 
     fn connect_signals(&self) {
+        self.connect_signals_ok_button();
         self.connect_signals_cancel_button();
+    }
+
+    fn connect_signals_ok_button(&self) {
+        use gtk::{ButtonExt, EntryExt};
+
+        let rc: NewTicket = self.clone();
+        self.ok_button.connect_clicked(move |_| {
+            // TODO Delete unwrap!
+            let ticket_name = rc.name_entry.get_text().unwrap();
+            if ticket_name.is_empty() {
+                show_error_dialog(&rc.dialog, "Name of the ticket is empty.");
+                return;
+            }
+            let category: Category;
+            let category_str = rc.category_combobox.get_active_text().unwrap();
+            if category_str.is_empty() {
+                show_error_dialog(&rc.dialog, "Category is empty or not selected.");
+                return;
+            }
+            match Category::get_category(&rc.main_ui.db.borrow(), &category_str) {
+                Ok(category_row) => {
+                    category = category_row;
+                }
+                Err(DbError::SqliteError(e)) => {
+                    match e {
+                        rusqlite::Error::QueryReturnedNoRows => {
+                            let mut new_category: Category = Category::new(category_str);
+                            match new_category.save_to_db(&rc.main_ui.db.borrow()) {
+                                Ok(_) => {
+                                    category = new_category;
+                                }
+                                Err(e) => {
+                                    show_error_dialog(&rc.dialog,
+                                                      &format!("Error of creating new category \
+                                                                in database.\n{}",
+                                                               e));
+                                    return;
+                                }
+                            }
+                        }
+                        _ => {
+                            show_error_dialog(&rc.dialog,
+                                              &format!("Error of searching category in \
+                                                        database.\n{}",
+                                                       e));
+                            return;
+                        }
+                    }
+                }
+                Err(e) => {
+                    show_error_dialog(&rc.dialog,
+                                      &format!("Error of searching category in \
+                                                database.\n{}",
+                                               e));
+                    return;
+                }
+            }
+            let expired_date = rc.expired_calendar.get_date();
+            let responsible_user: User;
+            if let Some(responsible_user_str) = rc.responsible_combobox.get_active_text() {
+                match User::get_user(&rc.main_ui.db.borrow(), &responsible_user_str) {
+                    Ok(res) => {
+                        responsible_user = res;
+                    }
+                    Err(e) => {
+                        show_error_dialog(&rc.dialog,
+                                          &format!("Error of searching user in database.\n{}", e));
+                        return;
+                    }
+                }
+            } else {
+                show_error_dialog(&rc.dialog, "Responsible user not selected.");
+                return;
+            }
+
+            let commentary_buffer = rc.commentary_text.get_buffer().unwrap();
+            let start_iter = commentary_buffer.get_start_iter();
+            let end_iter = commentary_buffer.get_end_iter();
+            let commentary_str = commentary_buffer.get_text(&start_iter, &end_iter, false).unwrap();
+            let comment: Option<Comment>;
+            if commentary_str.is_empty() {
+                comment = None;
+            } else {
+                comment = Some(Comment::new(&rc.main_ui.current_user.borrow(), commentary_str));
+            }
+
+            let document = Document::new(ticket_name,
+                                         &rc.main_ui.current_user.borrow(),
+                                         category,
+                                         responsible_user,
+                                         expired_date,
+                                         comment);
+            println!("{:?}", document);
+        });
     }
 
     fn connect_signals_cancel_button(&self) {

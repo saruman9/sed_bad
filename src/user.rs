@@ -11,7 +11,7 @@ trait UserVec {
     fn is_auth(&self, name: &str, pass: &str) -> bool;
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct User {
     id: i64,
     name: String,
@@ -34,6 +34,7 @@ impl User {
     }
 
     pub fn set(&mut self, user: User) {
+        self.id = user.id;
         self.name = user.name;
         self.pass = user.pass;
         self.pass_hash = user.pass_hash;
@@ -71,17 +72,28 @@ SELECT * FROM users WHERE name = $1 AND pass = $2 AND pass_hash = $3;
     pub fn save_to_db(&mut self, db: &Db) -> DbResult<i64> {
         let mut stmt = db.conn()
             .prepare("
-INSERT INTO users VALUES ($1, $2, $3);
+INSERT INTO users VALUES (NULL, $1, $2, $3);
 ")?;
         self.id = stmt.insert(&[&self.name(), &self.pass(), &self.pass_hash()])?;
         Ok(self.id())
+    }
+
+    pub fn get_user(db: &Db, name: &str) -> DbResult<User> {
+        db.conn().query_row_and_then("SELECT * FROM users WHERE name = ?", &[&name], |row| {
+            Ok(User {
+                id: row.get_checked(0)?,
+                name: row.get_checked(1)?,
+                pass: row.get_checked(2)?,
+                pass_hash: row.get_checked(3)?,
+            })
+        })
     }
 
     pub fn get_users(db: &Db) -> DbResult<Vec<User>> {
         let mut users: Vec<User> = Vec::new();
         let mut stmt = db.conn()
             .prepare("
-SELECT ROWID, * FROM users;
+SELECT * FROM users;
 ")?;
         let mut rows = stmt.query(&[])?;
         while let Some(row) = rows.next() {
@@ -179,9 +191,9 @@ SELECT * FROM users WHERE name = ?;
 ",
                    &[&"root"],
                    |row| {
-                       assert_eq!(row.get::<i32, String>(0), "root");
-                       assert_eq!(row.get::<i32, String>(1), "toor");
-                       assert_eq!(row.get::<i32, String>(2),
+                       assert_eq!(row.get::<i32, String>(1), "root");
+                       assert_eq!(row.get::<i32, String>(2), "toor");
+                       assert_eq!(row.get::<i32, String>(3),
                                   "7b24afc8bc80e548d66c4e7ff72171c5");
                    })
         .unwrap();
