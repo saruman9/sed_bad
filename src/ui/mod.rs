@@ -170,8 +170,8 @@ impl MainUI {
 
     fn setup(&self) {
         self.setup_columns();
-        self.setup_tickets_list_store();
         self.setup_directories_list();
+        self.setup_tickets_list_store();
         self.setup_window();
     }
 
@@ -254,24 +254,77 @@ impl MainUI {
         match Document::get_docs(&self.db.borrow()) {
             Ok(docs) => {
                 for doc in docs {
-                    if self.current_user.borrow().name() == doc.responsible().name() ||
-                       self.current_user.borrow().name() == doc.metadata().author().name() {
-                        self.tickets_list_store.insert_with_values(None,
-                                                                   &[0, 1, 2, 3, 4, 5, 6],
-                                                                   &[&doc.id(),
-                                                                     &(doc.metadata().status() ==
-                                                                       Status::Complete),
-                                                                     &doc.name(),
-                                                                     &doc.metadata()
-                                                                         .author()
-                                                                         .name(),
-                                                                     &doc.metadata()
-                                                                         .c_time()
-                                                                         .to_rfc2822(),
-                                                                     &doc.metadata()
-                                                                         .m_time()
-                                                                         .to_rfc2822(),
-                                                                     &doc.responsible().name()]);
+                    match self.directories_list.get_selected_row().unwrap().get_index() {
+                        0 => {
+                            if self.current_user.borrow().name() == doc.metadata().author().name() {
+                                self.tickets_list_store.insert_with_values(None,
+                                                                           &[0, 1, 2, 3, 4, 5, 6],
+                                                                           &[&doc.id(),
+                                                                             &(doc.metadata()
+                                                                                 .status() ==
+                                                                               Status::Complete),
+                                                                             &doc.name(),
+                                                                             &doc.metadata()
+                                                                                 .author()
+                                                                                 .name(),
+                                                                             &doc.metadata()
+                                                                                 .c_time()
+                                                                                 .to_rfc2822(),
+                                                                             &doc.metadata()
+                                                                                 .m_time()
+                                                                                 .to_rfc2822(),
+                                                                             &doc.responsible()
+                                                                                 .name()]);
+                            }
+                        }
+                        1 => {
+                            if self.current_user.borrow().name() == doc.responsible().name() {
+                                self.tickets_list_store.insert_with_values(None,
+                                                                           &[0, 1, 2, 3, 4, 5, 6],
+                                                                           &[&doc.id(),
+                                                                             &(doc.metadata()
+                                                                                 .status() ==
+                                                                               Status::Complete),
+                                                                             &doc.name(),
+                                                                             &doc.metadata()
+                                                                                 .author()
+                                                                                 .name(),
+                                                                             &doc.metadata()
+                                                                                 .c_time()
+                                                                                 .to_rfc2822(),
+                                                                             &doc.metadata()
+                                                                                 .m_time()
+                                                                                 .to_rfc2822(),
+                                                                             &doc.responsible()
+                                                                                 .name()]);
+                            }
+                        }
+                        2 => {
+                            if self.current_user.borrow().name() == doc.responsible().name() ||
+                               self.current_user.borrow().name() ==
+                               doc.metadata().author().name() ||
+                               self.current_user.borrow().is_root() {
+                                self.tickets_list_store.insert_with_values(None,
+                                                                           &[0, 1, 2, 3, 4, 5, 6],
+                                                                           &[&doc.id(),
+                                                                             &(doc.metadata()
+                                                                                 .status() ==
+                                                                               Status::Complete),
+                                                                             &doc.name(),
+                                                                             &doc.metadata()
+                                                                                 .author()
+                                                                                 .name(),
+                                                                             &doc.metadata()
+                                                                                 .c_time()
+                                                                                 .to_rfc2822(),
+                                                                             &doc.metadata()
+                                                                                 .m_time()
+                                                                                 .to_rfc2822(),
+                                                                             &doc.responsible()
+                                                                                 .name()]);
+                            }
+                        }
+                        _ => {}
                     }
                 }
             }
@@ -305,6 +358,7 @@ impl MainUI {
         self.connect_signals_print_user_menu();
         self.connect_signals_user_administration_menu();
         self.connect_signals_create_ticket_t_button();
+        self.connect_signals_directories_list();
         self.connect_signals_window();
     }
 
@@ -349,6 +403,13 @@ impl MainUI {
         let rc = self.clone();
         self.create_ticket_t_button.connect_clicked(move |_| {
             new_ticket::NewTicket::new(rc.clone());
+        });
+    }
+
+    fn connect_signals_directories_list(&self) {
+        let rc = self.clone();
+        self.directories_list.connect_row_selected(move |_, _| {
+            rc.update_ui();
         });
     }
 
