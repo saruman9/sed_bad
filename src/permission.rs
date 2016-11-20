@@ -24,6 +24,13 @@ impl Permission {
             others: NaivePermission::new(false, false, false),
         }
     }
+
+    pub fn get_int(&self) -> i64 {
+        let author_perm = self.author.get_int() * 100;
+        let responsible_perm = self.responsible.get_int() * 10;
+        let others_perm = self.others.get_int();
+        author_perm + responsible_perm + others_perm
+    }
 }
 
 impl NaivePermission {
@@ -33,5 +40,19 @@ impl NaivePermission {
             write: write,
             comment: comment,
         }
+    }
+
+    pub fn get_int(&self) -> i64 {
+        let mut res = 0;
+        if self.read {
+            res += 4;
+        }
+        if self.write {
+            res += 2;
+        }
+        if self.comment {
+            res += 1;
+        }
+        res
     }
 }

@@ -152,7 +152,7 @@ impl NewTicket {
     }
 
     fn connect_signals_ok_button(&self) {
-        use gtk::{ButtonExt, EntryExt};
+        use gtk::{ButtonExt, EntryExt, WidgetExt};
 
         let rc: NewTicket = self.clone();
         self.ok_button.connect_clicked(move |_| {
@@ -235,13 +235,22 @@ impl NewTicket {
                 comment = Some(Comment::new(&rc.main_ui.current_user.borrow(), commentary_str));
             }
 
-            let document = Document::new(ticket_name,
-                                         &rc.main_ui.current_user.borrow(),
-                                         category,
-                                         responsible_user,
-                                         expired_date,
-                                         comment);
-            println!("{:?}", document);
+            let mut document = Document::new(ticket_name,
+                                             &rc.main_ui.current_user.borrow(),
+                                             category,
+                                             responsible_user,
+                                             expired_date,
+                                             comment);
+            match document.save_to_db(&rc.main_ui.db.borrow()) {
+                Ok(_) => {
+                    rc.dialog.destroy();
+                    rc.main_ui.update_ui();
+                }
+                Err(e) => {
+                    show_error_dialog(&rc.dialog, &format!("Error of saving doc to db.\n{}", e));
+                    return;
+                }
+            }
         });
     }
 

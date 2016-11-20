@@ -448,8 +448,13 @@ impl MainUI {
 
         if self.current_user.borrow().name() != "" {
             self.h_box.show_all();
+            self.update_tickets_tree_view();
         } else {
             self.h_box.hide();
         }
+    }
+
+    fn update_tickets_tree_view(&self) {
+        
     }
 }
