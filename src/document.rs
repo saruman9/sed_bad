@@ -119,4 +119,18 @@ SELECT * FROM docs;
         }
         Ok(docs)
     }
+
+    pub fn get_by_id(db: &Db, doc_id: i64) -> DbResult<Document> {
+        db.conn().query_row_and_then("SELECT * FROM docs WHERE id = ?", &[&doc_id], |row| {
+            Ok(Document {
+                id: row.get_checked(0)?,
+                name: row.get_checked(1)?,
+                metadata: Metadata::get_by_id(db, row.get_checked(2)?)?,
+                permission: Permission::from_int(row.get_checked(3)?),
+                data: row.get_checked(4)?,
+                comments: Comment::get_by_doc_id(db, row.get_checked(0)?)?,
+                responsible: User::get_by_id(db, row.get_checked(5)?)?,
+            })
+        })
+    }
 }

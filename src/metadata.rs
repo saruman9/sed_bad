@@ -83,8 +83,8 @@ impl Metadata {
         self.status.clone()
     }
 
-    pub fn date_expired(&self) -> i64 {
-        self.date_expired.num_days_from_ce() as i64
+    pub fn date_expired(&self) -> DateTime<UTC> {
+        self.date_expired
     }
 
     pub fn save_to_db(&mut self, db: &Db) -> DbResult<i64> {

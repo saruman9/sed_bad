@@ -9,11 +9,11 @@ pub struct Permission {
     others: NaivePermission,
 }
 
-#[derive(Debug, PartialEq, Eq)]
-struct NaivePermission {
-    read: bool,
-    write: bool,
-    comment: bool,
+#[derive(Debug, PartialEq, Eq, Copy, Clone)]
+pub struct NaivePermission {
+    pub read: bool,
+    pub write: bool,
+    pub comment: bool,
 }
 
 impl Permission {
@@ -23,6 +23,18 @@ impl Permission {
             responsible: NaivePermission::new(true, false, true),
             others: NaivePermission::new(false, false, false),
         }
+    }
+
+    pub fn author(&self) -> NaivePermission {
+        self.author
+    }
+
+    pub fn responsible(&self) -> NaivePermission {
+        self.responsible
+    }
+
+    pub fn others(&self) -> NaivePermission {
+        self.others
     }
 
     pub fn get_int(&self) -> i64 {

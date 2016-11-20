@@ -6,6 +6,7 @@ use md5;
 
 use errors::DbResult;
 use db::Db;
+use document::Document;
 
 trait UserVec {
     fn is_auth(&self, name: &str, pass: &str) -> bool;
@@ -58,6 +59,10 @@ impl User {
 
     pub fn is_root(&self) -> bool {
         self.name() == "root"
+    }
+
+    pub fn is_access_grant(&self, doc: &Document) -> bool {
+        doc.metadata().author() == self
     }
 
     pub fn exists(&self, db: &Db) -> DbResult<bool> {

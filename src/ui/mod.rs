@@ -7,6 +7,7 @@ mod user_administration;
 mod edit_user;
 mod utils;
 mod new_ticket;
+mod edit_ticket;
 
 use gtk;
 
@@ -132,7 +133,7 @@ impl MainUI {
 
             tickets_scrolled_window: gtk::ScrolledWindow::new(None, None),
             tickets_tree_view: gtk::TreeView::new(),
-            tickets_list_store: gtk::ListStore::new(&[gtk::Type::String, // Id.
+            tickets_list_store: gtk::ListStore::new(&[gtk::Type::I64, // Id.
                                                       gtk::Type::Bool, // Completed.
                                                       gtk::Type::String, // Name.
                                                       gtk::Type::String, // Author.
@@ -359,6 +360,7 @@ impl MainUI {
         self.connect_signals_user_administration_menu();
         self.connect_signals_create_ticket_t_button();
         self.connect_signals_directories_list();
+        self.connect_signals_tickets_tree_view();
         self.connect_signals_window();
     }
 
@@ -410,6 +412,33 @@ impl MainUI {
         let rc = self.clone();
         self.directories_list.connect_row_selected(move |_, _| {
             rc.update_ui();
+        });
+    }
+
+    fn connect_signals_tickets_tree_view(&self) {
+        use gtk::{TreeViewSignals, TreeModelExt};
+
+        let rc: MainUI = self.clone();
+        self.tickets_tree_view.connect_row_activated(move |_, _, _| {
+            if let Some((tree_model, tree_iter)) = rc.tickets_tree_view
+                .get_selection()
+                .get_selected() {
+                let doc_id = tree_model.get_value(&tree_iter, 0)
+                    .get::<i64>()
+                    .unwrap();
+                match Document::get_by_id(&rc.db.borrow(), doc_id) {
+                    Ok(doc) => {
+                        edit_ticket::EditTicket::new(rc.clone(), doc);
+                    }
+                    Err(e) => {
+                        utils::show_error_dialog(&rc.window,
+                                                 &format!("Error of reading selected doc from \
+                                                           database.\n{}",
+                                                          e));
+                        return;
+                    }
+                }
+            }
         });
     }
 
