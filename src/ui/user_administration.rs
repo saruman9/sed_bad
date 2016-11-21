@@ -237,6 +237,7 @@ impl UserAdministration {
                         Ok(_) => {
                             rc.list_users_store.remove(&tree_iter);
                             rc.update_ui();
+                            rc.main_ui.update_ui();
                         }
                         Err(e) => {
                             show_error_dialog(&rc.dialog,

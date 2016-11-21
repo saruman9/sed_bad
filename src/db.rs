@@ -67,6 +67,7 @@ CREATE TABLE IF NOT EXISTS comments (
     doc_id NOT NULL REFERENCES docs(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 COMMIT;")?;
+        conn.execute("PRAGMA foreign_keys = ON;", &[]).unwrap();
         Ok(Db { conn: conn })
     }
 

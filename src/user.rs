@@ -127,7 +127,7 @@ SELECT * FROM users;
     pub fn delete_by_id(db: &Db, id: i64) -> DbResult<()> {
         let mut stmt = db.conn()
             .prepare("
-DELETE FROM users WHERE ROWID = ?;
+DELETE FROM users WHERE id = ?;
 ")?;
         stmt.execute(&[&id])?;
         Ok(())
@@ -137,7 +137,7 @@ DELETE FROM users WHERE ROWID = ?;
         let updated_user = User::new(name, pass);
         let mut stmt = db.conn()
             .prepare("
-UPDATE users SET name = $1, pass = $2, pass_hash = $3 WHERE ROWID == $4;
+UPDATE users SET name = $1, pass = $2, pass_hash = $3 WHERE id == $4;
 ")?;
         stmt.execute(&[&updated_user.name(), &updated_user.pass, &updated_user.pass_hash(), &id])?;
         Ok(())
