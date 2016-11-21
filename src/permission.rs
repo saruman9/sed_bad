@@ -2,7 +2,7 @@
 //!
 //! TODO Write documentation.
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub struct Permission {
     author: NaivePermission,
     responsible: NaivePermission,
@@ -22,6 +22,17 @@ impl Permission {
             author: NaivePermission::new(true, true, true),
             responsible: NaivePermission::new(true, false, true),
             others: NaivePermission::new(false, false, false),
+        }
+    }
+
+    pub fn from_naive(author: NaivePermission,
+                      responsible: NaivePermission,
+                      others: NaivePermission)
+                      -> Self {
+        Permission {
+            author: author,
+            responsible: responsible,
+            others: others,
         }
     }
 

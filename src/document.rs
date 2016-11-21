@@ -2,6 +2,8 @@
 //!
 //! TODO Write documentation.
 
+use chrono::UTC;
+
 use metadata::Metadata;
 use permission::Permission;
 use comment::Comment;
@@ -52,6 +54,11 @@ impl Document {
         self.name.as_ref()
     }
 
+    pub fn set_name<S: Into<String>>(&mut self, name: S) {
+        self.name = name.into();
+        self.metadata_mut().set_m_time(UTC::now());
+    }
+
     pub fn metadata(&self) -> &Metadata {
         &self.metadata
     }
@@ -60,8 +67,13 @@ impl Document {
         &mut self.metadata
     }
 
-    pub fn permission(&self) -> &Permission {
-        &self.permission
+    pub fn permission(&self) -> Permission {
+        self.permission
+    }
+
+    pub fn set_permission(&mut self, permission: Permission) {
+        self.permission = permission;
+        self.metadata_mut().set_m_time(UTC::now());
     }
 
     pub fn data(&self) -> Option<Vec<u8>> {
@@ -78,6 +90,21 @@ impl Document {
 
     pub fn responsible(&self) -> &User {
         &self.responsible
+    }
+
+    pub fn set_responsible(&mut self, responsible: User) {
+        self.responsible = responsible;
+        self.metadata_mut().set_m_time(UTC::now());
+    }
+
+    pub fn update(&self, db: &Db) -> DbResult<i32> {
+        db.conn()
+            .execute("UPDATE docs SET name = ?, permission = ?, responsible = ? WHERE id = ?;",
+                     &[&self.name(),
+                       &self.permission().get_int(),
+                       &self.responsible().id(),
+                       &self.id()])
+            .map_err(From::from)
     }
 
     pub fn save_to_db(&mut self, db: &Db) -> DbResult<i64> {

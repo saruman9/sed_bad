@@ -2,7 +2,7 @@
 //!
 //! TODO Write documentation.
 
-use chrono::{Date, DateTime, UTC, Datelike, NaiveDateTime, TimeZone};
+use chrono::{DateTime, UTC, TimeZone};
 
 use user::User;
 use category::Category;
@@ -28,7 +28,7 @@ pub enum Status {
 }
 
 impl Status {
-    fn get_num(&self) -> i64 {
+    pub fn get_num(&self) -> i64 {
         match *self {
             Status::Beginning => 0,
             Status::InProgress => 1,
@@ -36,7 +36,7 @@ impl Status {
         }
     }
 
-    fn from_num(num: i64) -> Status {
+    pub fn from_num(num: i64) -> Status {
         match num {
             0 => Status::Beginning,
             1 => Status::InProgress,
@@ -71,20 +71,56 @@ impl Metadata {
         self.m_time
     }
 
+    pub fn set_m_time(&mut self, m_time: DateTime<UTC>) {
+        self.m_time = m_time;
+    }
+
     pub fn author(&self) -> &User {
         &self.author
+    }
+
+    pub fn set_author(&mut self, author: User) {
+        self.author = author;
+        self.set_m_time(UTC::now());
     }
 
     pub fn category(&self) -> &Category {
         &self.category
     }
 
+    pub fn set_category(&mut self, category: Category) {
+        self.category = category;
+        self.set_m_time(UTC::now());
+    }
+
     pub fn status(&self) -> Status {
         self.status.clone()
     }
 
+    pub fn set_status(&mut self, status: Status) {
+        self.status = status;
+        self.set_m_time(UTC::now());
+    }
+
     pub fn date_expired(&self) -> DateTime<UTC> {
         self.date_expired
+    }
+
+    pub fn set_date_expired(&mut self, date: DateTime<UTC>) {
+        self.date_expired = date;
+        self.set_m_time(UTC::now());
+    }
+
+    pub fn update(&self, db:&Db) -> DbResult<i32> {
+        db.conn()
+            .execute("UPDATE metadata SET m_time = ?, author_id = ?, category_id = ?, status = ?, date_expired = ? WHERE id = ?;",
+                     &[&self.m_time(),
+                       &self.author().id(),
+                       &self.category().id(),
+                       &self.status().get_num(),
+                       &self.date_expired(),
+                       &self.id()])
+            .map_err(From::from)
     }
 
     pub fn save_to_db(&mut self, db: &Db) -> DbResult<i64> {

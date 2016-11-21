@@ -62,7 +62,7 @@ impl User {
     }
 
     pub fn is_access_grant(&self, doc: &Document) -> bool {
-        doc.metadata().author() == self
+        doc.metadata().author() == self || self.is_root()
     }
 
     pub fn exists(&self, db: &Db) -> DbResult<bool> {
