@@ -10,6 +10,7 @@ mod new_ticket;
 mod edit_ticket;
 
 use gtk;
+use chrono::{UTC, TimeZone};
 
 use std::rc::Rc;
 use std::cell::RefCell;
@@ -255,77 +256,114 @@ impl MainUI {
         match Document::get_docs(&self.db.borrow()) {
             Ok(docs) => {
                 for doc in docs {
-                    match self.directories_list.get_selected_row().unwrap().get_index() {
-                        0 => {
-                            if self.current_user.borrow().name() == doc.metadata().author().name() {
-                                self.tickets_list_store.insert_with_values(None,
-                                                                           &[0, 1, 2, 3, 4, 5, 6],
-                                                                           &[&doc.id(),
-                                                                             &(doc.metadata()
-                                                                                 .status() ==
-                                                                               Status::Complete),
-                                                                             &doc.name(),
-                                                                             &doc.metadata()
-                                                                                 .author()
-                                                                                 .name(),
-                                                                             &doc.metadata()
-                                                                                 .c_time()
-                                                                                 .to_rfc2822(),
-                                                                             &doc.metadata()
-                                                                                 .m_time()
-                                                                                 .to_rfc2822(),
-                                                                             &doc.responsible()
-                                                                                 .name()]);
+                    if let Some(selected_row) = self.directories_list.get_selected_row() {
+                        match selected_row.get_index() {
+                            0 => {
+                                if self.current_user.borrow().name() ==
+                                   doc.metadata().author().name() {
+                                    self.tickets_list_store
+                                        .insert_with_values(None,
+                                                            &[0, 1, 2, 3, 4, 5, 6],
+                                                            &[&doc.id(),
+                                                              &(doc.metadata()
+                                                                  .status() ==
+                                                                Status::Complete),
+                                                              &doc.name(),
+                                                              &doc.metadata()
+                                                                  .author()
+                                                                  .name(),
+                                                              &doc.metadata()
+                                                                  .c_time()
+                                                                  .to_rfc2822(),
+                                                              &doc.metadata()
+                                                                  .m_time()
+                                                                  .to_rfc2822(),
+                                                              &doc.responsible()
+                                                                  .name()]);
+                                }
                             }
-                        }
-                        1 => {
-                            if self.current_user.borrow().name() == doc.responsible().name() {
-                                self.tickets_list_store.insert_with_values(None,
-                                                                           &[0, 1, 2, 3, 4, 5, 6],
-                                                                           &[&doc.id(),
-                                                                             &(doc.metadata()
-                                                                                 .status() ==
-                                                                               Status::Complete),
-                                                                             &doc.name(),
-                                                                             &doc.metadata()
-                                                                                 .author()
-                                                                                 .name(),
-                                                                             &doc.metadata()
-                                                                                 .c_time()
-                                                                                 .to_rfc2822(),
-                                                                             &doc.metadata()
-                                                                                 .m_time()
-                                                                                 .to_rfc2822(),
-                                                                             &doc.responsible()
-                                                                                 .name()]);
+                            1 => {
+                                if self.current_user.borrow().name() == doc.responsible().name() {
+                                    self.tickets_list_store
+                                        .insert_with_values(None,
+                                                            &[0, 1, 2, 3, 4, 5, 6],
+                                                            &[&doc.id(),
+                                                              &(doc.metadata()
+                                                                  .status() ==
+                                                                Status::Complete),
+                                                              &doc.name(),
+                                                              &doc.metadata()
+                                                                  .author()
+                                                                  .name(),
+                                                              &doc.metadata()
+                                                                  .c_time()
+                                                                  .to_rfc2822(),
+                                                              &doc.metadata()
+                                                                  .m_time()
+                                                                  .to_rfc2822(),
+                                                              &doc.responsible()
+                                                                  .name()]);
+                                }
                             }
-                        }
-                        2 => {
-                            if self.current_user.borrow().name() == doc.responsible().name() ||
-                               self.current_user.borrow().name() ==
-                               doc.metadata().author().name() ||
-                               self.current_user.borrow().is_root() {
-                                self.tickets_list_store.insert_with_values(None,
-                                                                           &[0, 1, 2, 3, 4, 5, 6],
-                                                                           &[&doc.id(),
-                                                                             &(doc.metadata()
-                                                                                 .status() ==
-                                                                               Status::Complete),
-                                                                             &doc.name(),
-                                                                             &doc.metadata()
-                                                                                 .author()
-                                                                                 .name(),
-                                                                             &doc.metadata()
-                                                                                 .c_time()
-                                                                                 .to_rfc2822(),
-                                                                             &doc.metadata()
-                                                                                 .m_time()
-                                                                                 .to_rfc2822(),
-                                                                             &doc.responsible()
-                                                                                 .name()]);
+                            2 => {
+                                if self.current_user.borrow().name() == doc.responsible().name() ||
+                                   self.current_user.borrow().name() ==
+                                   doc.metadata().author().name() ||
+                                   self.current_user.borrow().is_root() {
+                                    self.tickets_list_store
+                                        .insert_with_values(None,
+                                                            &[0, 1, 2, 3, 4, 5, 6],
+                                                            &[&doc.id(),
+                                                              &(doc.metadata()
+                                                                  .status() ==
+                                                                Status::Complete),
+                                                              &doc.name(),
+                                                              &doc.metadata()
+                                                                  .author()
+                                                                  .name(),
+                                                              &doc.metadata()
+                                                                  .c_time()
+                                                                  .to_rfc2822(),
+                                                              &doc.metadata()
+                                                                  .m_time()
+                                                                  .to_rfc2822(),
+                                                              &doc.responsible()
+                                                                  .name()]);
+                                }
                             }
+                            3 => {
+                                let cal_date = self.calendar.get_date();
+                                let this_date = UTC.ymd(cal_date.0 as i32, cal_date.1, cal_date.2)
+                                    .and_hms(0, 0, 0) ==
+                                                doc.metadata().date_expired();
+                                if (self.current_user.borrow().name() == doc.responsible().name() ||
+                                    self.current_user.borrow().name() ==
+                                    doc.metadata().author().name() ||
+                                    self.current_user.borrow().is_root()) &&
+                                   this_date {
+                                    self.tickets_list_store
+                                        .insert_with_values(None,
+                                                            &[0, 1, 2, 3, 4, 5, 6],
+                                                            &[&doc.id(),
+                                                              &(doc.metadata()
+                                                                  .status() ==
+                                                                Status::Complete),
+                                                              &doc.name(),
+                                                              &doc.metadata()
+                                                                  .author()
+                                                                  .name(),
+                                                              &doc.metadata()
+                                                                  .c_time()
+                                                                  .to_rfc2822(),
+                                                              &doc.metadata()
+                                                                  .m_time()
+                                                                  .to_rfc2822(),
+                                                              &doc.responsible()
+                                                                  .name()]);
+                                }
+                            }
+                            _ => {}
                         }
-                        _ => {}
                     }
                 }
             }
@@ -342,7 +380,7 @@ impl MainUI {
         self.directories_list.insert(&gtk::Label::new(Some("Inbox")), 0);
         self.directories_list.insert(&gtk::Label::new(Some("Outbox")), 1);
         self.directories_list.insert(&gtk::Label::new(Some("All")), 2);
-        self.directories_list.insert(&gtk::Label::new(Some("Favorites")), 3);
+        self.directories_list.insert(&gtk::Label::new(Some("Calendar")), 3);
         self.directories_list.select_row(self.directories_list.get_row_at_index(2).as_ref());
     }
 
@@ -354,6 +392,7 @@ impl MainUI {
     }
 
     fn connect_signals(&self) {
+        self.connect_signals_calendar();
         self.connect_signals_quit_menu();
         self.connect_signals_log_in_menu();
         self.connect_signals_print_user_menu();
@@ -362,6 +401,13 @@ impl MainUI {
         self.connect_signals_directories_list();
         self.connect_signals_tickets_tree_view();
         self.connect_signals_window();
+    }
+
+    fn connect_signals_calendar(&self) {
+        let rc = self.clone();
+        self.calendar.connect_day_selected(move |_| {
+            rc.update_ui();
+        });
     }
 
     fn connect_signals_log_in_menu(&self) {
