@@ -536,8 +536,8 @@ impl EditTicket {
 
         area.pack_start(&self.name_label, false, false, 0);
         area.pack_start(&self.name_entry, false, false, 0);
-        area.pack_start(&self.c_time_label, false, false, 0);
-        area.pack_start(&self.m_time_label, false, false, 0);
+        // area.pack_start(&self.c_time_label, false, false, 0);
+        // area.pack_start(&self.m_time_label, false, false, 0);
         area.pack_start(&self.author_label, false, false, 0);
         area.pack_start(&self.author_combobox, false, false, 0);
         area.pack_start(&self.category_label, false, false, 0);
