@@ -88,6 +88,12 @@ impl Document {
         self.comments.as_mut()
     }
 
+    pub fn add_comment(&mut self, db: &Db, mut comment: Comment) -> DbResult<i64> {
+        self.metadata_mut().set_m_time(UTC::now());
+        self.metadata_mut().update(db)?;
+        comment.save_to_db(db, self.id)
+    }
+
     pub fn responsible(&self) -> &User {
         &self.responsible
     }

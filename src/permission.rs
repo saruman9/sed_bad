@@ -76,6 +76,18 @@ impl NaivePermission {
         }
     }
 
+    pub fn read(&self) -> bool {
+        self.read
+    }
+
+    pub fn write(&self) -> bool {
+        self.write
+    }
+
+    pub fn comment(&self) -> bool {
+        self.comment
+    }
+
     pub fn get_int(&self) -> i64 {
         let mut res = 0;
         if self.read {

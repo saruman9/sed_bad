@@ -8,6 +8,7 @@ mod edit_user;
 mod utils;
 mod new_ticket;
 mod edit_ticket;
+mod new_comment;
 
 use gtk;
 use chrono::{UTC, TimeZone};

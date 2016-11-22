@@ -12,6 +12,8 @@ use super::MainUI;
 use document::Document;
 use super::utils::show_error_dialog;
 use user::User;
+use super::new_comment::NewComment;
+
 use category::Category;
 use metadata::Status;
 use comment::Comment;
@@ -62,6 +64,7 @@ pub struct EditTicket {
 
     pub button_box: gtk::ButtonBox,
     pub ok_button: gtk::Button,
+    pub add_comment_button: gtk::Button,
     pub cancel_button: gtk::Button,
 }
 
@@ -116,6 +119,7 @@ impl EditTicket {
 
             button_box: gtk::ButtonBox::new(gtk::Orientation::Horizontal),
             ok_button: gtk::Button::new_with_mnemonic("_Ok"),
+            add_comment_button: gtk::Button::new_with_mnemonic("_Add comment"),
             cancel_button: gtk::Button::new_with_mnemonic("_Cancel"),
             doc: Rc::new(RefCell::new(document)),
         };
@@ -310,13 +314,15 @@ impl EditTicket {
 
         match Comment::get_by_doc_id(&self.main_ui.db.borrow(), self.doc.borrow().id()) {
             Ok(comments) => {
+                let mut comments_str = String::default();
                 for comment in comments {
-                    let buffer_text = self.comments_text.get_buffer().unwrap();
-                    buffer_text.set_text(&format!("{} wrote at {}:\n-----\n{}",
-                                                  comment.author().name(),
-                                                  comment.c_time().to_rfc2822(),
-                                                  comment.text()));
+                    comments_str.push_str(&format!("{} wrote at {}:\n-----\n{}\n",
+                                                   comment.author().name(),
+                                                   comment.c_time().to_rfc2822(),
+                                                   comment.text()));
                 }
+                let buffer_text = self.comments_text.get_buffer().unwrap();
+                buffer_text.set_text(&comments_str);
             }
             Err(e) => {
                 show_error_dialog(&self.dialog,
@@ -358,6 +364,7 @@ impl EditTicket {
     fn connect_signals(&self) {
         self.ok_button_connect();
         self.cancel_button_connect();
+        self.add_comment_button_connect();
     }
 
     fn ok_button_connect(&self) {
@@ -482,6 +489,32 @@ impl EditTicket {
         });
     }
 
+    fn add_comment_button_connect(&self) {
+        use gtk::ButtonExt;
+
+        let rc: EditTicket = self.clone();
+        self.add_comment_button.connect_clicked(move |_| {
+            let doc_comment_perm = (rc.doc.borrow().permission().author().comment(),
+                                    rc.doc.borrow().permission().responsible().comment(),
+                                    rc.doc.borrow().permission().others().comment());
+            let author_responsible_other = if rc.doc.borrow().metadata().author().name() ==
+                                              rc.main_ui.current_user.borrow().name() ||
+                                              rc.main_ui.current_user.borrow().is_root() {
+                (1, 0, 0)
+            } else if rc.doc.borrow().responsible().name() ==
+                                                     rc.main_ui.current_user.borrow().name() {
+                (0, 1, 0)
+            } else {
+                (0, 0, 1)
+            };
+            if doc_comment_perm.0 && author_responsible_other.0 == 1 ||
+               doc_comment_perm.1 && author_responsible_other.1 == 1 ||
+               doc_comment_perm.2 && author_responsible_other.2 == 1 {
+                NewComment::new(rc.clone());
+            }
+        });
+    }
+
     fn pack_and_show(&self) {
         self.perm_author_button_box_pack();
         self.perm_responsible_button_box_pack();
@@ -519,6 +552,7 @@ impl EditTicket {
         use gtk::ContainerExt;
 
         self.button_box.add(&self.ok_button);
+        self.button_box.add(&self.add_comment_button);
         self.button_box.add(&self.cancel_button);
     }
 
@@ -560,5 +594,9 @@ impl EditTicket {
         area.pack_start(&self.button_box, false, false, 0);
 
         self.dialog.show_all();
+    }
+
+    pub fn update_main(&self) {
+        self.comments_text_setup();
     }
 }
