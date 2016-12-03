@@ -3,7 +3,6 @@ name = "sed_bad"
 version = "0.1.0"
 dependencies = [
  "chrono 0.2.25 (registry+https://github.com/rust-lang/crates.io-index)",
- "gpgme 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "gtk 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "md5 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rusqlite 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -20,11 +19,6 @@ dependencies = [
  "libc 0.2.17 (registry+https://github.com/rust-lang/crates.io-index)",
  "pkg-config 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
-
-[[package]]
-name = "bitflags"
-version = "0.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "bitflags"
@@ -188,35 +182,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "gpg-error"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-dependencies = [
- "libgpg-error-sys 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "gpgme"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-dependencies = [
- "bitflags 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "gpg-error 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "gpgme-sys 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "lazy_static 0.1.16 (registry+https://github.com/rust-lang/crates.io-index)",
- "libc 0.1.12 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "gpgme-sys"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-dependencies = [
- "libc 0.1.12 (registry+https://github.com/rust-lang/crates.io-index)",
- "libgpg-error-sys 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
 name = "gtk"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -266,23 +231,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "lazy_static"
-version = "0.1.16"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-
-[[package]]
-name = "libc"
-version = "0.1.12"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-
-[[package]]
 name = "libc"
 version = "0.2.17"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-
-[[package]]
-name = "libgpg-error-sys"
-version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
@@ -406,7 +356,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [metadata]
 "checksum atk-sys 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)" = "52dba8b14510e6d21395f6176396993782f8d1097a7b56bda448213a745311fd"
-"checksum bitflags 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)" = "32866f4d103c4e438b1db1158aa1b1a80ee078e5d77a59a2f906fd62a577389c"
 "checksum bitflags 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)" = "8dead7461c1127cf637931a1e50934eb6eee8bff2f74433ac7909e9afcee04a3"
 "checksum bitflags 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)" = "4f67931368edf3a9a51d29886d245f1c3db2f1ef0dcc9e35ff70341b78c10d23"
 "checksum bitflags 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "aad18937a628ec6abcd26d1489012cc0e18c21798210f491af69ded9b881106d"
@@ -423,16 +372,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum glib 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "bf2e0735d142ea9c5f29b1df3cfe1f818be83acd5f639a4c5516c70807574b53"
 "checksum glib-sys 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)" = "512bc05befa05ae5fa84470205bae44d60c2209d95921d1a605e96f2f6578ac7"
 "checksum gobject-sys 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)" = "70a2806ba2978a5072660797bc76c06ebf1b29dd7f857c6b485ac33423677529"
-"checksum gpg-error 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)" = "97c21efb51764c93e829ce8ec8df0a5d9be7a9ab6b03c727800fc623551ecd7c"
-"checksum gpgme 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)" = "c34afb482a833e856b7910df71429bca9d8c36eb1342f0ffc42e77f01ddacb21"
-"checksum gpgme-sys 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "063248c7c93c2e8bdebb3128ee7d7e54789275c49d052f8851b4a5bb627c9a2e"
 "checksum gtk 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "f4d3d0f046cb1473bfe9e6fbcc8478a5cbab07cfb21495734a37c9d8cd463dc7"
 "checksum gtk-sys 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)" = "91d0e8c624c3b4e8047b960b350b208c82e2eb0d4e3db5da9a55590c10f2616d"
 "checksum kernel32-sys 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)" = "7507624b29483431c0ba2d82aece8ca6cdba9382bff4ddd0f7490560c056098d"
-"checksum lazy_static 0.1.16 (registry+https://github.com/rust-lang/crates.io-index)" = "cf186d1a8aa5f5bee5fd662bc9c1b949e0259e1bcc379d1f006847b0080c7417"
-"checksum libc 0.1.12 (registry+https://github.com/rust-lang/crates.io-index)" = "e32a70cf75e5846d53a673923498228bbec6a8624708a9ea5645f075d6276122"
 "checksum libc 0.2.17 (registry+https://github.com/rust-lang/crates.io-index)" = "044d1360593a78f5c8e5e710beccdc24ab71d1f01bc19a29bcacdba22e8475d8"
-"checksum libgpg-error-sys 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "d4397f13e582abf8053a0394b6dc73428f343636e02c2c1969b564ca0311ecd8"
 "checksum libsqlite3-sys 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)" = "663508cb9c1e23363aea1a8b1f7d6340394ebc3bc3a6daebfb9cc99b8feaf2ec"
 "checksum linked-hash-map 0.0.9 (registry+https://github.com/rust-lang/crates.io-index)" = "83f7ff3baae999fdf921cccf54b61842bb3b26868d50d02dff48052ebec8dd79"
 "checksum lru-cache 0.0.7 (registry+https://github.com/rust-lang/crates.io-index)" = "42d50dcb5d9f145df83b1043207e1ac0c37c9c779c4e128ca4655abc3f3cbf8c"
