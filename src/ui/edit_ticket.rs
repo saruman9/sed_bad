@@ -484,8 +484,9 @@ impl EditTicket {
     fn cancel_button_connect(&self) {
         use gtk::{ButtonExt, WidgetExt};
 
-        self.cancel_button.connect_clicked(|d| {
-            d.destroy();
+        let rc = self.clone();
+        self.cancel_button.connect_clicked(move |_| {
+            rc.dialog.destroy();
         });
     }
 
